@@ -509,19 +509,27 @@
         metricQueue = [];
     }
 
-    // ==================== ПАРСЕР ДОКУМЕНТА (ИСПРАВЛЕН) ====================
+    // ==================== ПАРСЕР ДОКУМЕНТА (ФИНАЛЬНЫЙ) ====================
 
     function parseDoc(raw) {
         const clean = raw.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-        const result = { name: '', role: '', tech: [], act1: '', act2: '', act3: '', metrics: [] };
+        const result = { 
+            name: '', 
+            role: '', 
+            tech: [], 
+            act1: '', 
+            act2: '', 
+            act3: '', 
+            metrics: [] 
+        };
 
-        // Секции будут накапливаться здесь
         const sections = {
             'portrait': [],
             'energy': [],
             'metrics': [],
             'example': [],
-            'experiment': []
+            'experiment': [],
+            'tech': []
         };
         
         let currentKey = null;
@@ -534,17 +542,18 @@
             if (line.startsWith('ПРОФИЛЬ:')) result.name = line.replace('ПРОФИЛЬ:', '').trim();
             else if (line.startsWith('ДОЛЖНОСТЬ:')) result.role = line.replace('ДОЛЖНОСТЬ:', '').trim();
             
-            // Определяем секцию по ключевым словам (более гибко)
+            // Определяем секцию по ключевым словам
             else if (trimmed.includes('ВАШ ПОРТРЕТ')) currentKey = 'portrait';
             else if (trimmed.includes('ЭНЕРГИЮ') || trimmed.includes('ГИПОТЕЗА')) currentKey = 'energy';
-            else if (trimmed.includes('НАПРЯЖЕНИЯ') && !trimmed.includes('ЗОНА')) currentKey = 'metrics'; // Карта натяжения
+            else if (trimmed.includes('КАРТА НАПРЯЖЕНИЯ')) currentKey = 'metrics'; // Карта натяжения
             else if (trimmed.includes('ВЫГЛЯДЕТЬ')) currentKey = 'example';
             else if (trimmed.includes('Эксперимент') || trimmed.includes('ПОПРОБОВАТЬ')) currentKey = 'experiment';
+            else if (trimmed.includes('ТЕХНИЧЕСКИЕ ПАРАМЕТРЫ')) currentKey = 'tech';
             
             // Пропускаем разделители
             else if (trimmed.startsWith('===') || trimmed.startsWith('---')) continue;
             
-            // Добавляем строку в текущую секцию
+            // Добавляем строку в текущую секцию (не трогая служебные строки)
             else if (currentKey && !trimmed.startsWith('ПРОФИЛЬ:') && !trimmed.startsWith('ДОЛЖНОСТЬ:')) {
                 sections[currentKey].push(line);
             }
@@ -552,40 +561,43 @@
 
         // Склеиваем массивы строк в текст
         result.act1 = sections['portrait'].join('\n').trim();
-        // Зона напряжения (energy + example)
         result.act2 = (sections['energy'].join('\n') + '\n\n' + sections['example'].join('\n')).trim();
         result.act3 = sections['experiment'].join('\n').trim();
+        result.tech = sections['tech'].join('\n').trim();
         
-        // Парсим метрики
+        // Парсим метрики (ищем числа во всем сыром тексте документа, но не трогая сам текст)
+        // Это гарантирует, что текст останется нетронутым, а цифры мы просто продублируем в графики.
+        // Секция metrics = sections['metrics'].join('\n'), берем только её для поиска чисел.
         result.metrics = parseMetrics(sections['metrics'].join('\n'));
 
         return result;
     }
 
-    // ==================== ПАРСЕР МЕТРИК (ИСПРАВЛЕН) ====================
+    // ==================== ПАРСЕР МЕТРИК ====================
 
     function parseMetrics(text) {
         const metrics = [];
         if (!text) return metrics;
         
         const lines = text.split('\n');
-        let currentLabel = 'Анализируемый фактор';
+        let currentLabel = null;
+        let currentVal = null;
         
         for (const line of lines) {
             const trimmed = line.trim();
             if (!trimmed) continue;
             
-            // Проверяем, есть ли в строке число-процентиль
+            // Ищем процентиль в строке
             const percentMatch = extractPercent(trimmed);
             
             if (percentMatch !== null) {
-                // Если нашли число, пытаемся вытащить название до него (первая часть строки)
+                // Убираем мусор вокруг числа, чтобы получить чистое название метрики
                 let label = trimmed.replace(/(\d+)(?:-й)?\s*(?:процентиль|%)?/i, '').trim();
-                // Очистка от мусора
                 label = label.replace(/[—\-:;]+$/, '').trim();
-                if (!label) label = 'Фактор';
                 
-                metrics.push({ label: label, value: percentMatch });
+                if (label) {
+                    metrics.push({ label: label, value: percentMatch });
+                }
             }
         }
         return metrics;
@@ -611,7 +623,18 @@
         document.getElementById('h-name').textContent = doc.name || '—';
         document.getElementById('h-role').textContent = doc.role || '—';
 
-        document.getElementById('block-tech').innerHTML = '<span class="badge">Расшифровано</span>';
+        // Вывод технических параметров (бейджи)
+        if (doc.tech) {
+            // Просто разбиваем строку по запятым или переносам на отдельные бейджи
+            const techItems = doc.tech.split(/\n|,/).map(t => t.trim()).filter(t => t);
+            if (techItems.length) {
+                document.getElementById('block-tech').innerHTML = techItems.map(t => `<span class="badge">${t}</span>`).join('');
+            } else {
+                document.getElementById('block-tech').innerHTML = '<span class="badge">Нет данных</span>';
+            }
+        } else {
+            document.getElementById('block-tech').innerHTML = '<span class="badge">Нет данных</span>';
+        }
 
         document.getElementById('block-act1').innerHTML = smartFormat(doc.act1);
         document.getElementById('block-act2').innerHTML = smartFormat(doc.act2);
@@ -637,12 +660,11 @@
         setTimeout(animateMetrics, 400);
     }
 
-    // ==================== ФОРМАТТЕР ТЕКСТА (ИСПРАВЛЕН) ====================
+    // ==================== ФОРМАТТЕР ТЕКСТА ====================
 
     function smartFormat(text) {
         if (!text || text.length < 5) return '<div class="text-block"><p style="color:var(--text-tertiary);">Нет данных</p></div>';
         
-        // Разбиваем на параграфы по двойному переносу
         const rawParagraphs = text.split(/\n\s*\n/);
         let html = '';
         
@@ -650,7 +672,7 @@
             const lines = rawPara.split('\n').map(l => l.trim()).filter(l => l);
             if (lines.length === 0) continue;
             
-            // Объединяем все строки параграфа через пробел в одну строку
+            // Собираем обратно в строку, чтобы не было разрывов
             const singleLine = lines.join(' ');
             
             let escaped = singleLine.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -658,16 +680,8 @@
             
             // Проверяем список (по цифре в начале)
             if (/^\d+[\.\)]\s/.test(escaped)) {
-                // Если одна строка содержит несколько пунктов (редкий случай, но на всякий случай)
-                if (escaped.match(/\d+[\.\)]\s/g)?.length > 1) {
-                     // Разбить на пункты сложно, лучше вывести как абзац
-                     html += `<p>${escaped}</p>`;
-                } else {
-                    // Одиночный пункт списка
-                    html += `<p>${escaped}</p>`;
-                }
+                html += `<p>${escaped}</p>`;
             } else {
-                // Обычный параграф
                 html += `<p>${escaped}</p>`;
             }
         }
