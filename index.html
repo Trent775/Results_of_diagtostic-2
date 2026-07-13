@@ -3,736 +3,704 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analytic Matrix | Персональный профиль</title>
-    <!-- Библиотека для шифрования -->
+    <title>Analytic Matrix | Профиль</title>
+    <!-- Только CryptoJS, никаких других зависимостей -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
-    <!-- Шрифты -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            /* Базовые цвета (светлая премиальная тема) */
-            --bg-base: #f9f9f6;
-            --bg-glass: rgba(255, 255, 255, 0.85);
-            --border-subtle: rgba(0, 0, 0, 0.05);
-            --border-medium: rgba(0, 0, 0, 0.08);
+            --bg-body: #f5f5f2;
+            --bg-card: rgba(255, 255, 255, 0.85);
+            --border-color: rgba(0, 0, 0, 0.06);
+            --text-main: #111111;
+            --text-muted: #555555;
             
-            /* Текст */
-            --text-primary: #1a1a1a;
-            --text-secondary: #4a4a4a;
-            --text-tertiary: #888888;
+            --color-blue: #2563eb;
+            --color-red: #dc2626;
+            --color-green: #059669;
+            --color-orange: #d97706;
             
-            /* Акценты */
-            --accent-blue: #2563eb;
-            --accent-blue-glow: rgba(37, 99, 235, 0.2);
-            --accent-red: #dc2626;
-            --accent-red-glow: rgba(220, 38, 38, 0.15);
-            --accent-amber: #d97706;
-            --accent-amber-glow: rgba(217, 119, 6, 0.15);
-            --accent-emerald: #059669;
-            --accent-emerald-glow: rgba(5, 150, 105, 0.15);
-            --accent-violet: #7c3aed;
-            --accent-violet-glow: rgba(124, 58, 237, 0.15);
-            
-            /* Тени и скругления */
-            --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.03);
-            --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.04);
-            --shadow-md: 0 10px 32px rgba(0, 0, 0, 0.05);
-            --shadow-lg: 0 24px 64px rgba(0, 0, 0, 0.06);
-            --radius-xs: 8px; 
-            --radius-sm: 12px; 
-            --radius-md: 20px;
-            --radius-lg: 28px;
-            
-            /* Анимации */
-            --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+            --shadow-float: 0 12px 40px rgba(0, 0, 0, 0.04);
+            --shadow-inset: inset 0 2px 4px rgba(0,0,0,0.02);
+            --transition-smooth: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        
+
         body {
-            font-family: 'Inter', -apple-system, sans-serif;
-            background: var(--bg-base);
-            color: var(--text-primary);
-            min-height: 100vh;
-            display: flex; 
-            justify-content: center; 
-            align-items: flex-start;
-            padding: 30px 20px;
-            -webkit-font-smoothing: antialiased;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            padding: 40px 20px;
             line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
         }
 
-        .container { max-width: 1040px; width: 100%; position: relative; }
+        .container {
+            width: 100%;
+            max-width: 960px;
+        }
 
-        /* ================= Экран входа ================= */
-        #login-screen {
-            margin-top: 15vh; 
-            text-align: center; 
-            max-width: 420px;
-            margin-left: auto; 
-            margin-right: auto; 
+        /* --- ЭКРАН АВТОРИЗАЦИИ --- */
+        #auth-view {
+            max-width: 400px;
+            margin: 15vh auto 0;
             position: relative;
         }
-        
-        .login-orb {
-            position: absolute; border-radius: 50%; pointer-events: none; z-index: 0;
-            filter: blur(40px);
-            animation: orbFloat 10s ease-in-out infinite alternate;
-        }
-        .login-orb.orb-1 {
-            width: 220px; height: 220px; top: -60px; left: -80px;
-            background: var(--accent-blue-glow);
-        }
-        .login-orb.orb-2 {
-            width: 280px; height: 280px; bottom: -100px; right: -100px;
-            background: var(--accent-violet-glow);
-            animation-delay: -3s;
+
+        .glass-panel {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: var(--shadow-float);
         }
 
-        @keyframes orbFloat {
-            0% { transform: translate(0, 0) scale(1); }
-            100% { transform: translate(30px, -40px) scale(1.1); }
-        }
-
-        .login-card {
-            position: relative; z-index: 1;
-            background: var(--bg-glass); 
-            backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-            padding: 48px 40px; 
-            border-radius: var(--radius-lg);
-            border: 1px solid var(--border-subtle); 
-            box-shadow: var(--shadow-lg);
-        }
-        
-        .login-icon {
-            width: 56px; height: 56px; margin: 0 auto 20px;
-            background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-violet) 100%);
-            border-radius: var(--radius-sm);
+        .auth-logo {
+            width: 48px; height: 48px;
+            background: var(--text-main);
+            color: #fff;
+            border-radius: 12px;
             display: flex; align-items: center; justify-content: center;
-            font-size: 22px; font-weight: 800; color: #fff;
-            box-shadow: 0 8px 24px var(--accent-blue-glow);
-        }
-        
-        .login-title { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 6px; }
-        .login-subtitle { font-size: 14px; color: var(--text-secondary); margin-bottom: 32px; }
-
-        .token-input {
-            width: 100%; padding: 16px 20px; 
-            background: #ffffff;
-            border: 1px solid var(--border-medium); 
-            border-radius: var(--radius-xs);
-            font-family: 'JetBrains Mono', monospace; 
-            font-size: 14px; text-align: center; 
-            color: var(--text-primary); outline: none;
-            transition: all 0.3s var(--ease-out-expo);
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
-        }
-        
-        .token-input:focus { 
-            border-color: var(--accent-blue); 
-            box-shadow: 0 0 0 4px var(--accent-blue-glow); 
+            font-weight: 800; font-size: 18px;
+            margin: 0 auto 24px;
         }
 
-        .btn-unlock {
-            width: 100%; padding: 16px; margin-top: 20px;
-            background: linear-gradient(135deg, var(--accent-blue) 0%, #1e40af 100%);
-            color: #fff; border: none; font-size: 15px; font-weight: 600;
-            cursor: pointer; border-radius: var(--radius-xs); letter-spacing: 0.5px;
-            transition: all 0.3s var(--ease-out-expo);
-            box-shadow: 0 8px 24px var(--accent-blue-glow);
+        .auth-title { text-align: center; font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+        .auth-subtitle { text-align: center; font-size: 13px; color: var(--text-muted); margin-bottom: 32px; }
+
+        .input-token {
+            width: 100%; padding: 14px;
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px; text-align: center;
+            outline: none; transition: var(--transition-smooth);
+            box-shadow: var(--shadow-inset);
+        }
+        .input-token:focus { border-color: var(--text-main); }
+
+        .btn-submit {
+            width: 100%; padding: 14px; margin-top: 16px;
+            background: var(--text-main); color: #fff;
+            border: none; border-radius: 8px;
+            font-weight: 600; font-size: 14px;
+            cursor: pointer; transition: var(--transition-smooth);
+        }
+        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+
+        .error-message {
+            margin-top: 16px; padding: 12px;
+            background: #fef2f2; color: var(--color-red);
+            border-radius: 8px; font-size: 13px; font-weight: 500;
+            text-align: center; display: none;
+        }
+
+        /* --- ЭКРАН ПРОФИЛЯ --- */
+        #profile-view { display: none; }
+
+        .nav-bar { margin-bottom: 24px; }
+        .btn-back {
+            background: none; border: none;
+            color: var(--text-muted); font-weight: 600; font-size: 13px;
+            cursor: pointer; display: flex; align-items: center; gap: 8px;
+            transition: color 0.2s;
+        }
+        .btn-back:hover { color: var(--text-main); }
+
+        .hero-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 24px; padding: 40px; margin-bottom: 24px;
             position: relative; overflow: hidden;
+            box-shadow: var(--shadow-float);
         }
-        
-        .btn-unlock:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(37, 99, 235, 0.3); }
-        .btn-unlock:active { transform: translateY(0); }
-        
-        .btn-unlock::after {
-            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-            background: linear-gradient(45deg, transparent 40%, rgba(255,255,255,0.2) 50%, transparent 60%);
-            animation: shimmer 3s infinite;
-        }
-        @keyframes shimmer {
-            0% { transform: translateX(-100%) rotate(45deg); }
-            100% { transform: translateX(100%) rotate(45deg); }
+        .hero-section::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px;
+            background: linear-gradient(90deg, var(--color-blue), var(--color-green), var(--color-orange), var(--color-red));
         }
 
-        .error-msg {
-            color: var(--accent-red); margin-top: 16px; display: none;
-            font-size: 13px; font-weight: 500;
-            background: rgba(220,38,38,0.05); padding: 12px 16px;
-            border-radius: var(--radius-xs); border: 1px solid rgba(220,38,38,0.15);
-        }
-        .error-msg.visible { display: block; animation: shake 0.4s ease-in-out; }
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-4px); }
-            75% { transform: translateX(4px); }
-        }
+        .profile-name { font-size: 32px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; }
+        .profile-role { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-top: 8px; }
 
-        /* ================= ЭКРАН ПРОФИЛЯ ================= */
-        #profile-screen { display: none; }
-        
-        .reveal-anim {
-            opacity: 0; transform: translateY(40px);
-            animation: revealUp 0.8s var(--ease-out-expo) forwards;
-        }
-        @keyframes revealUp {
-            to { opacity: 1; transform: translateY(0); }
-        }
+        .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+        @media (max-width: 850px) { .grid-layout { grid-template-columns: 1fr; } }
 
-        .top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
-        .btn-exit {
-            display: inline-flex; align-items: center; gap: 8px;
-            background: var(--bg-glass); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--border-medium); color: var(--text-secondary);
-            padding: 10px 20px; border-radius: 30px; font-size: 13px; font-weight: 600;
-            cursor: pointer; transition: all 0.3s var(--ease-out-expo);
-            box-shadow: var(--shadow-xs);
+        .content-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px; padding: 32px;
+            box-shadow: var(--shadow-float);
+            opacity: 0; transform: translateY(20px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
         }
-        .btn-exit:hover { background: #fff; color: var(--text-primary); box-shadow: var(--shadow-sm); transform: translateX(-3px); }
+        .content-card.visible { opacity: 1; transform: translateY(0); }
 
-        .hero-card {
-            background: var(--bg-glass); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-            border-radius: var(--radius-lg); padding: 40px 48px; margin-bottom: 24px;
-            border: 1px solid var(--border-subtle); box-shadow: var(--shadow-md);
-            position: relative; overflow: hidden;
-        }
-        .hero-card::before {
-            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
-            background: linear-gradient(90deg, var(--accent-blue), var(--accent-violet), var(--accent-emerald), var(--accent-amber), var(--accent-blue));
-            background-size: 200% 100%;
-            animation: gradientFlow 5s linear infinite;
-        }
-        
-        .hero-name { font-size: 32px; font-weight: 800; letter-spacing: -0.5px; color: var(--text-primary); }
-        .hero-role { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--accent-blue); margin-top: 6px; }
-
-        .grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
-        @media (max-width: 800px) { .grid-2col { grid-template-columns: 1fr; } }
-
-        .card {
-            background: var(--bg-glass); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-            border-radius: var(--radius-md); padding: 36px;
-            border: 1px solid var(--border-subtle); box-shadow: var(--shadow-sm);
-            transition: transform 0.4s var(--ease-out-expo), box-shadow 0.4s var(--ease-out-expo);
-        }
-        .card:hover { box-shadow: var(--shadow-lg); transform: translateY(-4px); }
-
-        .card-header {
-            display: flex; align-items: center; gap: 12px;
+        .card-title {
+            font-size: 11px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.1em; color: var(--text-muted);
             margin-bottom: 24px; padding-bottom: 16px;
-            border-bottom: 1px solid var(--border-medium);
+            border-bottom: 1px solid var(--border-color);
+            display: flex; align-items: center; gap: 10px;
         }
-        .card-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
-        .card-dot.dot-blue { background: var(--accent-blue); box-shadow: 0 0 10px var(--accent-blue-glow); }
-        .card-dot.dot-amber { background: var(--accent-amber); box-shadow: 0 0 10px var(--accent-amber-glow); }
-        .card-dot.dot-red { background: var(--accent-red); box-shadow: 0 0 10px var(--accent-red-glow); }
-        .card-dot.dot-emerald { background: var(--accent-emerald); box-shadow: 0 0 10px var(--accent-emerald-glow); }
-        .card-dot.dot-gray { background: #999; }
-        
-        .card-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-secondary); }
+        .indicator { width: 8px; height: 8px; border-radius: 50%; }
+        .ind-blue { background: var(--color-blue); }
+        .ind-red { background: var(--color-red); }
+        .ind-green { background: var(--color-green); }
+        .ind-orange { background: var(--color-orange); }
+        .ind-gray { background: #ccc; }
 
-        /* Специфичные акценты карточек */
-        .card-risk { border-left: 4px solid var(--accent-red); background: linear-gradient(135deg, rgba(220,38,38,0.015) 0%, var(--bg-glass) 50%); margin-bottom: 24px; }
-        .card-protocol { border-left: 4px solid var(--accent-emerald); background: linear-gradient(135deg, rgba(5,150,105,0.015) 0%, var(--bg-glass) 50%); margin-bottom: 24px; }
-        .card-tech { margin-bottom: 24px; }
-
-        /* ================= ТЕКСТОВЫЕ БЛОКИ ================= */
-        .text-block { 
-            font-size: 15px; 
-            line-height: 1.7; 
-            color: var(--text-primary); 
-            max-width: 680px; 
-        }
+        /* Типографика внутри карточек */
+        .rich-text { max-width: 680px; font-size: 15px; color: #222; }
+        .rich-text p { margin-bottom: 16px; }
+        .rich-text p:last-child { margin-bottom: 0; }
         
-        .text-block p { margin-bottom: 16px; }
-        .text-block p:last-child { margin-bottom: 0; }
+        .rich-text ul, .rich-text ol { margin: 16px 0 16px 24px; padding: 0; }
+        .rich-text li { margin-bottom: 12px; padding-left: 4px; }
+        .rich-text li::marker { color: var(--text-muted); font-weight: 600; }
         
-        .text-block strong { color: var(--text-primary); font-weight: 700; }
+        .rich-text strong { font-weight: 700; color: var(--text-main); }
         
-        /* Списки */
-        .text-block ul, .text-block ol { 
-            margin: 16px 0 16px 20px; 
-            padding-left: 0; 
-        }
-        .text-block li { 
-            margin-bottom: 12px; 
-            padding-left: 8px;
-        }
-        .text-block li::marker {
-            color: var(--accent-blue);
-            font-weight: 700;
+        .rich-text blockquote {
+            border-left: 3px solid var(--color-blue);
+            background: rgba(37, 99, 235, 0.04);
+            padding: 16px 20px; margin: 20px 0;
+            font-style: italic; border-radius: 0 8px 8px 0;
+            color: var(--text-muted);
         }
 
-        /* Цитаты и примеры */
-        .text-quote {
-            background: rgba(37, 99, 235, 0.03);
-            border-left: 3px solid var(--accent-blue);
-            padding: 18px 24px; 
-            font-size: 15px; 
-            font-style: italic; 
-            color: var(--text-secondary);
-            border-radius: 0 var(--radius-xs) var(--radius-xs) 0;
-            margin: 20px 0; 
+        /* Акценты для блоков */
+        .card-danger { border-left: 4px solid var(--color-red); }
+        .card-action { border-left: 4px solid var(--color-green); }
+
+        /* Графики */
+        .metric-item { margin-bottom: 24px; }
+        .metric-item:last-child { margin-bottom: 0; }
+        .metric-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8px; }
+        .metric-label { font-size: 14px; font-weight: 600; max-width: 80%; line-height: 1.3; }
+        .metric-value { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 20px; }
+        .metric-track { height: 6px; background: #e5e5e5; border-radius: 3px; overflow: hidden; }
+        .metric-fill { height: 100%; border-radius: 3px; width: 0; transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1); }
+        .metric-fill.pulsing { animation: pulseGlow 2s infinite alternate; }
+        
+        @keyframes pulseGlow {
+            0% { filter: brightness(1); }
+            100% { filter: brightness(1.2); }
         }
 
-        /* ================= МЕТРИКИ (Графики) ================= */
-        .metric-row { margin-bottom: 24px; }
-        .metric-row:last-child { margin-bottom: 0; }
-        
-        .metric-top { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8px; }
-        .metric-name { font-size: 14px; font-weight: 600; color: var(--text-primary); max-width: 75%; line-height: 1.3;}
-        .metric-pct { font-size: 22px; font-weight: 800; letter-spacing: -1px; font-family: 'JetBrains Mono', monospace; }
-        
-        .metric-bar { height: 8px; background: rgba(0,0,0,0.05); border-radius: 4px; overflow: hidden; }
-        .metric-fill { height: 100%; border-radius: 4px; width: 0; transition: width 1.5s var(--ease-out-expo); }
-        
-        /* Пульсация графиков */
-        .metric-fill.animated { animation: barPulse 3s infinite alternate; }
-        @keyframes barPulse { 
-            0% { filter: brightness(1); } 
-            100% { filter: brightness(1.2) drop-shadow(0 0 2px rgba(255,255,255,0.3)); } 
-        }
-
-        /* ================= ТЕГИ (Бейджи) ================= */
-        .badge-wrap { display: flex; flex-wrap: wrap; gap: 10px; }
-        .badge {
-            background: #ffffff; 
-            padding: 8px 16px; 
-            border-radius: 30px;
-            font-size: 13px; font-weight: 500; color: var(--text-secondary);
-            border: 1px solid var(--border-medium);
+        /* Технические бейджи */
+        .tech-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+        .tech-tag {
+            background: #fff; border: 1px solid var(--border-color);
+            padding: 6px 12px; border-radius: 20px;
+            font-size: 12px; font-weight: 500; color: var(--text-muted);
             transition: all 0.2s ease;
-            box-shadow: var(--shadow-xs);
         }
-        .badge:hover { 
-            background: var(--accent-blue-glow); 
-            border-color: var(--accent-blue); 
-            color: var(--accent-blue); 
-            transform: translateY(-2px); 
-        }
+        .tech-tag:hover { background: #f0f0f0; color: var(--text-main); }
 
-        @media (max-width: 600px) {
-            .hero-card { padding: 30px 24px; }
-            .hero-name { font-size: 24px; }
-            .card { padding: 24px; }
-            .login-card { padding: 40px 24px; }
-        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <!-- ЭКРАН ВХОДА -->
-    <div id="login-screen">
+    <!-- VIEW: AUTH -->
+    <div id="auth-view">
         <div class="login-orb orb-1"></div>
         <div class="login-orb orb-2"></div>
-        <div class="login-card">
-            <div class="login-icon">AM</div>
-            <div class="login-title">Analytic Matrix</div>
-            <div class="login-subtitle">Персональный профиль сотрудника</div>
-            <input type="text" class="token-input" id="token-input" placeholder="Введите персональный токен" autocomplete="off">
-            <button class="btn-unlock" onclick="unlock()">Открыть профиль</button>
-            <div class="error-msg" id="error-msg"></div>
+        <div class="glass-panel">
+            <div class="auth-logo">AM</div>
+            <h1 class="auth-title">Analytic Matrix</h1>
+            <p class="auth-subtitle">Персональный профиль сотрудника</p>
+            <input type="text" id="token-input" class="input-token" placeholder="Введите ваш токен" autocomplete="off" spellcheck="false">
+            <button class="btn-submit" id="btn-unlock">Открыть профиль</button>
+            <div id="error-msg" class="error-message"></div>
         </div>
     </div>
 
-    <!-- ЭКРАН ПРОФИЛЯ -->
-    <div id="profile-screen">
-        <div class="top-bar reveal-anim" style="animation-delay: 0s;">
-            <button class="btn-exit" onclick="lock()">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:-3px"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-                Закрыть профиль
+    <!-- VIEW: PROFILE -->
+    <div id="profile-view">
+        <div class="nav-bar">
+            <button class="btn-back" id="btn-lock">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                Выйти
             </button>
         </div>
 
-        <div class="hero-card reveal-anim" style="animation-delay: 0.1s;">
-            <div class="hero-name" id="h-name">—</div>
-            <div class="hero-role" id="h-role">—</div>
+        <div class="hero-section">
+            <div class="profile-name" id="ui-name">Загрузка...</div>
+            <div class="profile-role" id="ui-role">...</div>
         </div>
 
-        <div class="grid-2col">
-            <div class="card reveal-anim" style="animation-delay: 0.2s;">
-                <div class="card-header">
-                    <div class="card-dot dot-blue"></div>
-                    <div class="card-label">Рабочая модель</div>
-                </div>
-                <div id="block-act1"></div>
+        <div class="grid-layout">
+            <div class="content-card">
+                <div class="card-title"><div class="indicator ind-blue"></div>Рабочая модель</div>
+                <div class="rich-text" id="ui-portrait"></div>
             </div>
 
-            <div class="card reveal-anim" style="animation-delay: 0.3s;">
-                <div class="card-header">
-                    <div class="card-dot dot-amber"></div>
-                    <div class="card-label">Карта натяжения</div>
-                </div>
-                <div id="block-metrics"></div>
+            <div class="content-card">
+                <div class="card-title"><div class="indicator ind-orange"></div>Карта натяжения</div>
+                <div id="ui-metrics"></div>
             </div>
         </div>
 
-        <div class="card card-risk reveal-anim" style="animation-delay: 0.4s;">
-            <div class="card-header">
-                <div class="card-dot dot-red"></div>
-                <div class="card-label" style="color:var(--accent-red);">Зона напряжения</div>
-            </div>
-            <div id="block-act2"></div>
+        <div class="content-card card-danger" style="margin-bottom: 24px;">
+            <div class="card-title" style="color: var(--color-red)"><div class="indicator ind-red"></div>Зона напряжения</div>
+            <div class="rich-text" id="ui-tension"></div>
         </div>
 
-        <div class="card card-protocol reveal-anim" id="wrap-act3" style="animation-delay: 0.5s;">
-            <div class="card-header">
-                <div class="card-dot dot-emerald"></div>
-                <div class="card-label" style="color:var(--accent-emerald);">Рекомендованный эксперимент</div>
-            </div>
-            <div id="block-act3"></div>
+        <div class="content-card card-action" id="card-experiment" style="margin-bottom: 24px; display: none;">
+            <div class="card-title" style="color: var(--color-green)"><div class="indicator ind-green"></div>Рекомендованный эксперимент</div>
+            <div class="rich-text" id="ui-experiment"></div>
         </div>
 
-        <div class="card card-tech reveal-anim" id="wrap-tech" style="animation-delay: 0.6s; display:none;">
-            <div class="card-header">
-                <div class="card-dot dot-gray"></div>
-                <div class="card-label">Технические параметры</div>
-            </div>
-            <div class="badge-wrap" id="block-tech"></div>
+        <div class="content-card">
+            <div class="card-title"><div class="indicator ind-gray"></div>Технические параметры</div>
+            <div class="tech-tags" id="ui-tech"></div>
         </div>
     </div>
 </div>
 
 <script>
-    let DB = null;
-    let TECH = null;
-    let metricQueue = [];
+/**
+ * СИСТЕМНОЕ ЯДРО
+ * Разделено на DataLayer, ParserLayer и UILayer для enterprise-качества.
+ */
 
-    // Инициализация при загрузке
-    window.addEventListener('load', async () => {
-        try {
-            const resDB = await fetch('database.json');
-            if (resDB.ok) DB = await resDB.json();
-        } catch (e) {
-            console.warn("DB load failed");
-        }
-        
-        try {
-            const resTech = await fetch('tech_info.json');
-            if (resTech.ok) TECH = await resTech.json();
-        } catch (e) {
-            console.warn("Tech info load failed");
-        }
-        
-        const savedToken = sessionStorage.getItem('am_token');
-        if (savedToken && DB) { 
-            document.getElementById('token-input').value = savedToken; 
-            unlock(); 
-        }
-    });
-
-    document.getElementById('token-input').addEventListener('keydown', e => { 
-        if (e.key === 'Enter') unlock(); 
-    });
-
-    function showErr(msg) { 
-        const el = document.getElementById('error-msg'); 
-        el.textContent = msg; 
-        el.classList.remove('visible'); 
-        void el.offsetWidth; 
-        el.classList.add('visible'); 
-    }
-    
-    function hideErr() { 
-        document.getElementById('error-msg').classList.remove('visible'); 
+class DataLayer {
+    constructor() {
+        this.database = null;
+        this.techInfo = null;
+        this.normalizedTechInfo = {};
     }
 
-    // Умный поиск ключей (отсекает цифры, спецсимволы, пробелы)
-    function fuzzyMatchKey(dictionary, targetKey) {
-        if (!dictionary || !targetKey) return null;
-        if (dictionary[targetKey]) return dictionary[targetKey]; 
+    async init() {
+        try {
+            const [dbRes, techRes] = await Promise.all([
+                fetch('database.json').catch(() => null),
+                fetch('tech_info.json').catch(() => null)
+            ]);
+            
+            if (dbRes && dbRes.ok) this.database = await dbRes.json();
+            if (techRes && techRes.ok) {
+                this.techInfo = await techRes.json();
+                this._buildNormalizedTechIndex();
+            }
+        } catch (e) {
+            console.error("DataLayer init error:", e);
+        }
+    }
 
-        const normalize = str => str.toLowerCase().replace(/[^а-яёa-z]/gi, '');
-        const targetNorm = normalize(targetKey);
+    _normalizeString(str) {
+        // Очистка от пробелов, дефисов, цифр. Перевод в нижний регистр.
+        // "Гостев Сергей т170" -> "гостевсергей"
+        return str.toLowerCase().replace(/[^а-яёa-z]/gi, '');
+    }
+
+    _buildNormalizedTechIndex() {
+        for (const key in this.techInfo) {
+            this.normalizedTechInfo[this._normalizeString(key)] = this.techInfo[key];
+        }
+    }
+
+    getEncryptedProfile(tokenName) {
+        if (!this.database) return null;
+        const normTarget = this._normalizeString(tokenName);
         
-        for (const key in dictionary) {
-            const keyNorm = normalize(key);
-            if (keyNorm === targetNorm) return dictionary[key];
-            if (targetNorm.length > 3 && keyNorm.includes(targetNorm)) return dictionary[key];
-            if (keyNorm.length > 3 && targetNorm.includes(keyNorm)) return dictionary[key];
+        // Сначала точное совпадение
+        if (this.database[tokenName]) return this.database[tokenName];
+        
+        // Нечеткое совпадение
+        for (const key in this.database) {
+            if (this._normalizeString(key) === normTarget) return this.database[key];
         }
         return null;
     }
 
-    function unlock() {
-        hideErr();
-        const rawToken = document.getElementById('token-input').value;
-        const token = rawToken.trim(); 
-        
-        if (!DB) { showErr('База данных еще загружается...'); return; }
-        if (!token) { showErr('Пожалуйста, введите токен.'); return; }
-        
-        const lastDashIdx = token.lastIndexOf('-');
-        if (lastDashIdx === -1) { showErr('Неверный формат токена.'); return; }
-        
-        const employeeName = token.substring(0, lastDashIdx).trim();
-        const encryptedData = fuzzyMatchKey(DB, employeeName);
-        
-        if (!encryptedData) { showErr('Сотрудник не найден в базе данных.'); return; }
+    getTechInfo(tokenName) {
+        const normTarget = this._normalizeString(tokenName);
+        return this.normalizedTechInfo[normTarget] || null;
+    }
 
-        let decryptedText;
+    decrypt(encryptedBase64, fullToken) {
         try {
-            const tokenBytes = CryptoJS.enc.Utf8.parse(token);
-            const key = CryptoJS.SHA256(tokenBytes); 
+            const tokenBytes = CryptoJS.enc.Utf8.parse(fullToken);
+            const key = CryptoJS.SHA256(tokenBytes);
             const iv = CryptoJS.MD5(tokenBytes);
-            const decrypted = CryptoJS.AES.decrypt(encryptedData, key, { 
-                iv: iv, 
-                mode: CryptoJS.mode.CBC, 
-                padding: CryptoJS.pad.Pkcs7 
+            
+            const decrypted = CryptoJS.AES.decrypt(encryptedBase64, key, {
+                iv: iv,
+                mode: CryptoJS.mode.CBC,
+                padding: CryptoJS.pad.Pkcs7
             });
-            decryptedText = decrypted.toString(CryptoJS.enc.Utf8);
-            if (!decryptedText || decryptedText.length === 0) throw new Error("Empty decryption");
-        } catch (e) { 
-            showErr('Ключ недействителен. Проверьте правильность токена.'); 
-            return; 
+            
+            const text = decrypted.toString(CryptoJS.enc.Utf8);
+            if (!text) throw new Error("Decryption yielded empty string");
+            return text;
+        } catch (e) {
+            return null;
+        }
+    }
+}
+
+class ParserLayer {
+    
+    // Экранирование HTML тегов
+    static escapeHtml(unsafe) {
+        return safeString = unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;");
+    }
+
+    // Парсинг базового Markdown (bold)
+    static parseMarkdown(text) {
+        return text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    }
+
+    /**
+     * СИСТЕМНЫЙ УМНЫЙ ФОРМАТЕР ТЕКСТА
+     * Решает проблему "разорванных" строк и слипшихся списков.
+     */
+    static formatRichText(rawText) {
+        if (!rawText || rawText.trim().length === 0) return '<p>Нет данных</p>';
+
+        const lines = rawText.split('\n');
+        const processedLines = [];
+        
+        // ШАГ 1: Un-wrap (Склейка искусственно разорванных строк)
+        for (let i = 0; i < lines.length; i++) {
+            let line = lines[i].trim();
+            if (line === '') {
+                processedLines.push('');
+                continue;
+            }
+
+            // Проверяем, является ли строка концом абзаца/мысли
+            // Заканчивается на пунктуацию ИЛИ следующая строка пустая ИЛИ следующая строка начинается со списка
+            const endsWithPunctuation = /[.!?:]$/.test(line);
+            const isNextLineEmpty = (i + 1 >= lines.length) || (lines[i + 1].trim() === '');
+            const isNextLineList = (i + 1 < lines.length) && /^[-•\d]/.test(lines[i + 1].trim());
+
+            if (!endsWithPunctuation && !isNextLineEmpty && !isNextLineList) {
+                // Если строка разорвана, присоединяем следующую
+                lines[i+1] = line + ' ' + lines[i+1].trim();
+            } else {
+                processedLines.push(line);
+            }
         }
 
-        sessionStorage.setItem('am_token', token);
-        renderProfile(decryptedText, employeeName);
-    }
-
-    function lock() {
-        sessionStorage.removeItem('am_token');
-        document.getElementById('login-screen').style.display = 'block';
-        document.getElementById('profile-screen').style.display = 'none';
-        document.getElementById('token-input').value = '';
-        hideErr();
-        metricQueue = [];
-    }
-
-    // Базовое экранирование HTML
-    function escapeHtml(str) {
-        return str
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-            .replace(/\*(.+?)\*/g, '<em>$1</em>');
-    }
-
-    // Умный рендер текста (предотвращение "текстового кома")
-    // Разделяет текст на абзацы по двойному переносу строки, затем парсит списки
-    function smartFormat(text) {
-        if (!text || text.trim().length < 5) return '<div class="text-block"><p style="color:var(--text-tertiary);">Нет данных</p></div>';
-
+        // ШАГ 2: Рендер в HTML (Стейт-машина)
         let html = '';
-        // Разбиваем текст на блоки (абзацы/списки), разделенные пустой строкой
-        const blocks = text.split(/\n\s*\n/); 
-        
-        for (let block of blocks) {
-            block = block.trim();
-            if (!block) continue;
-            
-            // Если блок - маркированный список (есть строки, начинающиеся с • или -)
-            if (/^\s*[-•–*]\s+/m.test(block)) {
-                html += '<ul>';
-                // Разбиваем блок по маркерам
-                const items = block.split(/^\s*[-•–*]\s+/m).filter(i => i.trim());
-                for (let item of items) {
-                    // Убираем жесткие переносы строк внутри одного пункта меню
-                    item = item.replace(/\n/g, ' ').trim();
-                    html += `<li>${escapeHtml(item)}</li>`;
-                }
-                html += '</ul>';
+        let inUl = false;
+        let inOl = false;
+
+        for (let line of processedLines) {
+            if (!line) {
+                // Пустая строка закрывает списки
+                if (inUl) { html += '</ul>'; inUl = false; }
+                if (inOl) { html += '</ol>'; inOl = false; }
+                continue;
             }
-            // Если блок - нумерованный список (есть строки, начинающиеся с цифры и точки)
-            else if (/^\s*\d+[\.\)]\s+/m.test(block)) {
-                html += '<ol>';
-                const items = block.split(/^\s*\d+[\.\)]\s+/m).filter(i => i.trim());
-                let counter = 1;
-                for (let item of items) {
-                    item = item.replace(/\n/g, ' ').trim();
-                    // Восстанавливаем номер
-                    html += `<li>${escapeHtml(item)}</li>`;
-                    counter++;
-                }
-                html += '</ol>';
-            }
-            // Если блок - цитата
-            else if (block.startsWith('«') || block.startsWith('"') || block.startsWith('>')) {
-                block = block.replace(/\n/g, ' ').replace(/^[>«"]\s*|\s*[»"]$/g, '').trim();
-                html += `<div class="text-quote">${escapeHtml(block)}</div>`;
-            }
-            // Обычный абзац
+
+            line = this.parseMarkdown(this.escapeHtml(line));
+
+            const ulMatch = line.match(/^[-•]\s+(.*)/);
+            const olMatch = line.match(/^(\d+)[\.\)]\s+(.*)/);
+
+            if (ulMatch) {
+                if (inOl) { html += '</ol>'; inOl = false; }
+                if (!inUl) { html += '<ul>'; inUl = true; }
+                html += `<li>${ulMatch[1]}</li>`;
+            } 
+            else if (olMatch) {
+                if (inUl) { html += '</ul>'; inUl = false; }
+                if (!inOl) { html += '<ol>'; inOl = true; }
+                html += `<li>${olMatch[2]}</li>`;
+            } 
             else {
-                // Склеиваем разорванные строки внутри абзаца в один сплошной текст
-                block = block.replace(/\n/g, ' ').trim();
-                html += `<p>${escapeHtml(block)}</p>`;
+                if (inUl) { html += '</ul>'; inUl = false; }
+                if (inOl) { html += '</ol>'; inOl = false; }
+                html += `<p>${line}</p>`;
             }
         }
-        
-        return `<div class="text-block">${html}</div>`;
+
+        if (inUl) html += '</ul>';
+        if (inOl) html += '</ol>';
+
+        return html;
     }
 
-    // Жесткий экстрактор метрик. Парсит только то, что связано с графиком.
-    function extractMetrics(lines) {
+    /**
+     * ЖЕСТКИЙ ЭКСТРАКТОР МЕТРИК
+     * Защита от мусора и комментариев LLM.
+     */
+    static extractMetrics(text) {
         const metrics = [];
-        let lastLabel = '';
-        
-        for (let line of lines) {
-            let cleanLine = line.trim();
-            if (!cleanLine) continue;
-            
-            // Защита: как только дошли до инструкции "Как читать карту" - останавливаем парсинг
-            if (cleanLine.toUpperCase().includes('КАК ЧИТАТЬ ЭТУ КАРТУ') || cleanLine.includes('Первая полоска')) {
+        const lines = text.split('\n');
+        let currentLabel = '';
+
+        for (let i = 0; i < lines.length; i++) {
+            let line = lines[i].trim();
+            if (!line) continue;
+
+            // Если парсер дошел до блока "Как читать эту карту" - немедленный стоп.
+            if (line.toUpperCase().includes('КАК ЧИТАТЬ') || line.includes('Первая полоска')) {
                 break;
             }
-            
-            // Ищем строку с полоской прогресса и процентами (например: ██████░░░ 10%)
-            if (/[█░]/.test(cleanLine) && cleanLine.includes('%')) {
-                const pctMatch = cleanLine.match(/(\d{1,3})\s*%/);
-                if (pctMatch && lastLabel) {
-                    const val = parseInt(pctMatch[1], 10);
-                    // Добавляем метрику, если значение корректно
-                    if (val >= 0 && val <= 100) {
-                        metrics.push({ label: lastLabel, value: val });
+
+            // Ищем строку с прогресс-баром LLM
+            if (/[█░]/.test(line) && line.includes('%')) {
+                const percentMatch = line.match(/(\d{1,3})\s*%/);
+                if (percentMatch && currentLabel) {
+                    const value = parseInt(percentMatch[1], 10);
+                    // Валидация: 0-100%, метка адекватной длины, не является служебной строкой
+                    if (value >= 0 && value <= 100 && currentLabel.length < 100 && !/колонк|строк/i.test(currentLabel)) {
+                        metrics.push({ label: currentLabel, value: value });
                     }
-                    lastLabel = ''; // Сбрасываем метку после использования
+                    currentLabel = ''; // сброс
                 }
             } else {
-                // Если это не полоска и не разделитель, запоминаем как возможное название графика
-                if (!cleanLine.startsWith('===') && !cleanLine.toUpperCase().includes('КАРТА НАПРЯЖЕНИЯ')) {
-                    // Очищаем от двоеточий на конце
-                    lastLabel = cleanLine.replace(/[:\-]+$/, '').trim();
+                // Если строка не заголовок ===, запоминаем ее как потенциальное имя следующей метрики
+                if (!line.startsWith('===')) {
+                    currentLabel = line.replace(/[:\-]+$/, '').trim(); // Убираем висящие двоеточия
                 }
             }
+
+            // Защита: нам нужно максимум 4 показателя карты натяжения
+            if (metrics.length === 4) break;
         }
+
         return metrics;
     }
 
-    function renderProfile(rawText, employeeName) {
-        const sections = { portrait: [], tension: [], metrics: [], experiment: [] };
-        let currentSection = null; 
-        let name = employeeName;
-        let role = 'Сотрудник';
-
-        const lines = rawText.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
+    /**
+     * СЕГМЕНТАТОР ОТЧЕТА
+     */
+    static parseDocument(rawText) {
+        const doc = { name: '', role: '', portrait: [], tension: [], metricsRaw: '', experiment: [] };
+        const lines = rawText.replace(/\r/g, '').split('\n');
         
-        for (const line of lines) {
-            const upperLine = line.trim().toUpperCase();
+        let currentSection = 'portrait';
 
-            // Извлечение заголовка (Имя / Должность)
-            if (upperLine.startsWith('ПРОФИЛЬ:')) { 
-                name = line.replace(/^ПРОФИЛЬ:/i, '').trim(); 
-                continue; 
-            }
-            if (upperLine.startsWith('ДОЛЖНОСТЬ:')) { 
-                role = line.replace(/^ДОЛЖНОСТЬ:/i, '').trim(); 
-                continue; 
-            }
+        for (let line of lines) {
+            const trimmed = line.trim();
+            const upper = trimmed.toUpperCase();
+
+            // Извлекаем шапку
+            if (upper.startsWith('ПРОФИЛЬ:')) { doc.name = trimmed.substring(8).trim(); continue; }
+            if (upper.startsWith('ДОЛЖНОСТЬ:')) { doc.role = trimmed.substring(10).trim(); continue; }
             
-            // Смена секций по ключевым заголовкам
-            if (upperLine.includes('ВАШ ПОРТРЕТ')) { currentSection = 'portrait'; continue; }
-            if (upperLine.includes('ЧТО ЗАБИРАЕТ ВАШУ ЭНЕРГИЮ') || upperLine.includes('ГИПОТЕЗА СИСТЕМЫ')) { currentSection = 'tension'; continue; }
-            if (upperLine.includes('КАРТА НАПРЯЖЕНИЯ')) { currentSection = 'metrics'; continue; }
-            if (upperLine.includes('КАК ЭТО МОЖЕТ ВЫГЛЯДЕТЬ')) { currentSection = 'tension_example'; continue; }
-            if (upperLine.includes('ЧТО МОЖНО ПОПРОБОВАТЬ') || upperLine.includes('ЭКСПЕРИМЕНТ')) { currentSection = 'experiment'; continue; }
-            
-            // Сохраняем строки в нужный раздел, игнорируя разделители "==="
-            if (currentSection && !line.trim().startsWith('===')) {
-                if (currentSection === 'tension_example') {
-                    sections['tension'].push(line); // Склеиваем гипотезу и пример в один блок
-                } else {
-                    sections[currentSection].push(line);
-                }
+            if (/^={5,}$/.test(trimmed)) continue; // Пропускаем ===
+
+            // Определяем смену секций по ключевым фразам в заголовках
+            if (upper.includes('ВАШ ПОРТРЕТ')) { currentSection = 'portrait'; continue; }
+            if (upper.includes('ЧТО ЗАБИРАЕТ ВАШУ ЭНЕРГИЮ') || upper.includes('ГИПОТЕЗА')) { currentSection = 'tension'; continue; }
+            if (upper.includes('КАРТА НАПРЯЖЕНИЯ')) { currentSection = 'metricsRaw'; continue; }
+            if (upper.includes('КАК ЭТО МОЖЕТ ВЫГЛЯДЕТЬ')) { currentSection = 'tension'; continue; } // Сливаем гипотезу и пример
+            if (upper.includes('ЧТО МОЖНО ПОПРОБОВАТЬ') || upper.includes('ЭКСПЕРИМЕНТ')) { currentSection = 'experiment'; continue; }
+
+            // Наполняем секции
+            if (currentSection === 'metricsRaw') {
+                doc.metricsRaw += line + '\n';
+            } else if (currentSection && doc[currentSection] !== undefined) {
+                doc[currentSection].push(line);
             }
         }
 
-        // Обновление UI
-        document.getElementById('h-name').textContent = name;
-        document.getElementById('h-role').textContent = role;
+        return {
+            name: doc.name,
+            role: doc.role,
+            htmlPortrait: this.formatRichText(doc.portrait.join('\n')),
+            htmlTension: this.formatRichText(doc.tension.join('\n')),
+            htmlExperiment: this.formatRichText(doc.experiment.join('\n')),
+            metrics: this.extractMetrics(doc.metricsRaw)
+        };
+    }
+}
 
-        document.getElementById('block-act1').innerHTML = smartFormat(sections.portrait.join('\n'));
-        document.getElementById('block-act2').innerHTML = smartFormat(sections.tension.join('\n'));
-        
-        const experimentText = sections.experiment.join('\n');
-        if (experimentText.trim().length > 10) {
-            document.getElementById('block-act3').innerHTML = smartFormat(experimentText);
-            document.getElementById('wrap-act3').style.display = 'block';
-        } else {
-            document.getElementById('wrap-act3').style.display = 'none';
-        }
-
-        // Рендер метрик
-        const metrics = extractMetrics(sections.metrics);
-        renderMetricsBlock(metrics);
-
-        // Рендер технических параметров
-        renderTechBlock(name);
-
-        // Показ экранов и запуск анимаций
-        document.getElementById('login-screen').style.display = 'none';
-        document.getElementById('profile-screen').style.display = 'block';
-
-        setTimeout(() => {
-            metricQueue.forEach(item => {
-                const el = document.getElementById(item.id);
-                if (el) el.style.width = item.width + '%';
-            });
-            metricQueue = [];
-        }, 400);
+class UILayer {
+    constructor() {
+        this.views = {
+            auth: document.getElementById('auth-view'),
+            profile: document.getElementById('profile-view')
+        };
+        this.errorEl = document.getElementById('error-msg');
+        this.animations = [];
     }
 
-    function renderMetricsBlock(metrics) {
-        const container = document.getElementById('block-metrics');
+    showError(msg) {
+        this.errorEl.textContent = msg;
+        this.errorEl.style.display = 'block';
+    }
+
+    hideError() {
+        this.errorEl.style.display = 'none';
+    }
+
+    showProfile() {
+        this.views.auth.style.display = 'none';
+        this.views.profile.style.display = 'block';
+        
+        // Запуск анимаций карточек
+        const cards = document.querySelectorAll('.content-card');
+        cards.forEach((card, index) => {
+            setTimeout(() => card.classList.add('visible'), 100 + (index * 150));
+        });
+    }
+
+    showAuth() {
+        this.views.profile.style.display = 'none';
+        this.views.auth.style.display = 'block';
+        document.getElementById('token-input').value = '';
+        const cards = document.querySelectorAll('.content-card');
+        cards.forEach(card => card.classList.remove('visible'));
+    }
+
+    render(parsedDoc, techInfo) {
+        // Шапка
+        document.getElementById('ui-name').textContent = parsedDoc.name || 'Сотрудник';
+        document.getElementById('ui-role').textContent = parsedDoc.role || 'Должность не указана';
+
+        // Текстовые блоки
+        document.getElementById('ui-portrait').innerHTML = parsedDoc.htmlPortrait;
+        document.getElementById('ui-tension').innerHTML = parsedDoc.htmlTension;
+        
+        const expEl = document.getElementById('card-experiment');
+        if (parsedDoc.htmlExperiment.length > 50) {
+            document.getElementById('ui-experiment').innerHTML = parsedDoc.htmlExperiment;
+            expEl.style.display = 'block';
+        } else {
+            expEl.style.display = 'none';
+        }
+
+        // Метрики
+        this.renderMetrics(parsedDoc.metrics);
+
+        // Техническая информация
+        this.renderTech(techInfo);
+    }
+
+    renderMetrics(metrics) {
+        const container = document.getElementById('ui-metrics');
         if (!metrics || metrics.length === 0) {
-            container.innerHTML = '<div class="text-block"><p style="color:var(--text-tertiary);">Метрики не обнаружены.</p></div>';
+            container.innerHTML = '<p class="text-muted">Метрики не сформированы</p>';
             return;
         }
 
         let html = '';
+        this.animations = [];
+
         metrics.forEach((m, i) => {
-            let color, glow;
-            if (m.value >= 80) { color = 'var(--accent-red)'; glow = 'var(--accent-red-glow)'; }
-            else if (m.value >= 50) { color = 'var(--accent-amber)'; glow = 'var(--accent-amber-glow)'; }
-            else if (m.value >= 20) { color = 'var(--accent-blue)'; glow = 'var(--accent-blue-glow)'; }
-            else { color = 'var(--accent-emerald)'; glow = 'var(--accent-emerald-glow)'; }
-            
+            let color, shadow;
+            if (m.value >= 80) { color = 'var(--color-red)'; shadow = 'var(--accent-red-glow)'; }
+            else if (m.value >= 50) { color = 'var(--color-orange)'; shadow = 'var(--accent-amber-glow)'; }
+            else if (m.value >= 20) { color = 'var(--color-blue)'; shadow = 'var(--accent-blue-glow)'; }
+            else { color = 'var(--color-green)'; shadow = 'var(--accent-emerald-glow)'; }
+
             html += `
-                <div class="metric-row">
-                    <div class="metric-top">
-                        <span class="metric-name">${escapeHtml(m.label)}</span>
-                        <span class="metric-pct" style="color:${color};">${m.value}%</span>
+                <div class="metric-item">
+                    <div class="metric-header">
+                        <div class="metric-label">${ParserLayer.escapeHtml(m.label)}</div>
+                        <div class="metric-value" style="color:${color}">${m.value}%</div>
                     </div>
-                    <div class="metric-bar">
-                        <div class="metric-fill animated" id="m-${i}" style="background:${color}; box-shadow:0 0 12px ${glow};"></div>
+                    <div class="metric-track">
+                        <div class="metric-fill pulsing" id="bar-${i}" style="background-color:${color}; box-shadow: 0 0 10px ${shadow}"></div>
                     </div>
                 </div>`;
-            metricQueue.push({ id: `m-${i}`, width: m.value });
+            this.animations.push({ id: `bar-${i}`, width: m.value });
         });
+
         container.innerHTML = html;
+
+        // Запускаем анимацию прогресс-баров с задержкой
+        setTimeout(() => {
+            this.animations.forEach(anim => {
+                const el = document.getElementById(anim.id);
+                if (el) el.style.width = anim.width + '%';
+            });
+        }, 500);
     }
 
-    function renderTechBlock(employeeName) {
-        const wrap = document.getElementById('wrap-tech');
-        const container = document.getElementById('block-tech');
-        
-        const info = fuzzyMatchKey(TECH, employeeName);
-        
+    renderTech(info) {
+        const container = document.getElementById('ui-tech');
         if (!info) {
-            wrap.style.display = 'none';
+            container.innerHTML = '<span class="tech-tag">Данные не найдены</span>';
             return;
         }
 
-        wrap.style.display = 'block';
-        const badges = [];
-        
-        if (info.status) badges.push(`Статус: ${info.status}`);
-        if (info.medianTime) badges.push(`Время ответа: ${info.medianTime}`);
-        if (info.blurCount !== undefined) badges.push(`Смена вкладок: ${info.blurCount}`);
-        if (info.flatlining) badges.push(`Паттерн: Flatlining`);
-        if (info.discProfile) badges.push(`DISC: ${info.discProfile}`);
-        if (info.dominantScales && Array.isArray(info.dominantScales)) {
-            info.dominantScales.forEach(scale => badges.push(scale));
+        const tags = [];
+        if (info.status) tags.push(`Статус: ${info.status}`);
+        if (info.medianTime) tags.push(`Время: ${info.medianTime}`);
+        if (info.blurCount !== undefined) tags.push(`Смена вкладок: ${info.blurCount}`);
+        if (info.flatlining) tags.push(`Паттерн: Flatlining`);
+        if (info.discProfile) tags.push(`DISC: ${info.discProfile}`);
+        if (info.dominantScales) {
+            info.dominantScales.forEach(s => tags.push(s));
         }
 
-        container.innerHTML = badges.map(t => `<span class="badge">${escapeHtml(t)}</span>`).join('');
+        container.innerHTML = tags.map(t => `<span class="tech-tag">${ParserLayer.escapeHtml(t)}</span>`).join('');
     }
+}
+
+// Инициализация приложения
+const data = new DataLayer();
+const ui = new UILayer();
+
+window.addEventListener('DOMContentLoaded', async () => {
+    await data.init();
+    
+    // Авто-логин
+    const savedToken = sessionStorage.getItem('am_token');
+    if (savedToken) {
+        document.getElementById('token-input').value = savedToken;
+        processLogin();
+    }
+});
+
+document.getElementById('btn-unlock').addEventListener('click', processLogin);
+document.getElementById('token-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') processLogin();
+});
+document.getElementById('btn-lock').addEventListener('click', () => {
+    sessionStorage.removeItem('am_token');
+    ui.showAuth();
+});
+
+function processLogin() {
+    ui.hideError();
+    const token = document.getElementById('token-input').value.trim();
+    
+    if (!data.database) { ui.showError("База данных недоступна"); return; }
+    if (!token) { ui.showError("Введите токен"); return; }
+
+    const dashIdx = token.lastIndexOf('-');
+    if (dashIdx === -1) { ui.showError("Неверный формат токена"); return; }
+
+    const employeeName = token.substring(0, dashIdx).trim();
+    const encrypted = data.getEncryptedProfile(employeeName);
+
+    if (!encrypted) { ui.showError("Сотрудник не найден"); return; }
+
+    const decrypted = data.decrypt(encrypted, token);
+    if (!decrypted || !decrypted.includes('ПРОФИЛЬ:')) { 
+        ui.showError("Недействительный токен-ключ"); 
+        return; 
+    }
+
+    sessionStorage.setItem('am_token', token);
+    
+    const parsed = ParserLayer.parseDocument(decrypted);
+    const techInfo = data.getTechInfo(employeeName);
+    
+    ui.render(parsed, techInfo);
+    ui.showProfile();
+}
 </script>
 </body>
 </html>
