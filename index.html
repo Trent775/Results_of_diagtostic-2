@@ -12,17 +12,14 @@
     <style>
         :root {
             --bg-base: #fafaf8;
-            --bg-elevated: #ffffff;
             --bg-glass: rgba(255, 255, 255, 0.65);
             --border-subtle: rgba(0, 0, 0, 0.05);
             --border-medium: rgba(0, 0, 0, 0.08);
-            --border-strong: rgba(0, 0, 0, 0.12);
             --text-primary: #131313;
             --text-secondary: #555555;
             --text-tertiary: #8a8a8a;
             
             --accent-blue: #1d4ed8;
-            --accent-blue-bright: #3b82f6;
             --accent-blue-glow: rgba(29, 78, 216, 0.18);
             --accent-red: #dc2626;
             --accent-red-glow: rgba(220, 38, 38, 0.15);
@@ -31,16 +28,13 @@
             --accent-emerald: #059669;
             --accent-emerald-glow: rgba(5, 150, 105, 0.15);
             --accent-violet: #6d28d9;
-            --accent-violet-glow: rgba(109, 40, 217, 0.15);
+            --accent-violet-glow: rgba(109, 40, 217, 0.12);
             
             --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.03);
             --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
             --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.05);
             --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.07);
-            --shadow-xl: 0 24px 64px rgba(0, 0, 0, 0.09);
             --shadow-glow-blue: 0 0 24px var(--accent-blue-glow);
-            --shadow-glow-red: 0 0 24px var(--accent-red-glow);
-            --shadow-glow-emerald: 0 0 24px var(--accent-emerald-glow);
             
             --radius-xs: 6px;
             --radius-sm: 10px;
@@ -49,8 +43,6 @@
             --radius-xl: 28px;
             
             --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
-            --ease-out-back: cubic-bezier(0.34, 1.56, 0.64, 1);
-            --ease-spring: cubic-bezier(0.22, 0.98, 0.41, 1.32);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -65,7 +57,6 @@
             align-items: flex-start;
             padding: 20px;
             -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
         }
 
         .container { max-width: 1000px; width: 100%; margin-top: 20px; }
@@ -311,39 +302,44 @@
         }
 
         /* ============ TEXT RENDERING ============ */
-        .text-section { margin-bottom: 16px; }
-        .text-section:last-child { margin-bottom: 0; }
-
-        .text-heading {
-            font-size: 11px; font-weight: 700; text-transform: uppercase;
-            letter-spacing: 2px; color: var(--accent-blue);
-            margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
-        }
-        .text-heading::after {
-            content: ''; flex: 1; height: 1px;
-            background: linear-gradient(90deg, var(--border-medium), transparent);
-        }
-
         .text-block {
-            background: #f9f8f6; padding: 14px 18px;
-            border-radius: var(--radius-xs); margin-bottom: 8px;
-            border: 1px solid var(--border-subtle);
-            font-size: 13.5px; line-height: 1.7; color: var(--text-primary);
-            transition: all 0.25s var(--ease-out-expo);
+            font-size: 14px;
+            line-height: 1.75;
+            color: var(--text-primary);
+            max-width: 680px;
         }
-        .text-block:hover {
-            background: #f3f1ed; transform: translateX(4px);
-            border-color: var(--border-medium);
+
+        .text-block p {
+            margin-bottom: 14px;
         }
-        .text-block strong { color: var(--accent-blue); font-weight: 700; }
+
+        .text-block ul, .text-block ol {
+            margin: 10px 0 16px 0;
+            padding-left: 22px;
+        }
+
+        .text-block li {
+            margin-bottom: 7px;
+            line-height: 1.65;
+            font-size: 14px;
+        }
+
+        .text-block strong {
+            color: var(--accent-blue);
+            font-weight: 700;
+        }
 
         .text-quote {
             background: linear-gradient(135deg, rgba(109,40,217,0.03), rgba(29,78,216,0.02));
             border-left: 3px solid var(--accent-violet);
-            padding: 16px 20px; font-size: 13.5px; line-height: 1.7;
-            font-style: italic; color: var(--text-primary);
+            padding: 16px 20px;
+            font-size: 14px;
+            line-height: 1.7;
+            font-style: italic;
+            color: var(--text-primary);
             border-radius: 0 var(--radius-xs) var(--radius-xs) 0;
-            margin: 14px 0;
+            margin: 16px 0;
+            max-width: 680px;
         }
 
         /* ============ METRICS ============ */
@@ -387,7 +383,6 @@
             color: var(--text-primary); box-shadow: var(--shadow-xs);
         }
 
-        /* ============ RESPONSIVE ============ */
         @media (max-width: 600px) {
             .hero-card { padding: 24px 20px; }
             .hero-name { font-size: 22px; }
@@ -400,7 +395,7 @@
 
 <div class="container">
 
-    <!-- LOGIN -->
+    <!-- ============ LOGIN SCREEN ============ -->
     <div id="login-screen">
         <div class="login-orb orb-1"></div>
         <div class="login-orb orb-2"></div>
@@ -415,7 +410,7 @@
         </div>
     </div>
 
-    <!-- DASHBOARD -->
+    <!-- ============ DASHBOARD ============ -->
     <div id="profile-screen">
         <div class="top-bar">
             <button class="btn-exit" onclick="lock()">← Выйти</button>
@@ -574,11 +569,11 @@
 
         document.getElementById('block-tech').innerHTML = doc.tech.map(t => `<span class="badge">${t}</span>`).join('');
 
-        document.getElementById('block-act1').innerHTML = smartFormat(doc.act1, 'var(--accent-blue)');
-        document.getElementById('block-act2').innerHTML = smartFormat(doc.act2, 'var(--accent-red)');
+        document.getElementById('block-act1').innerHTML = smartFormat(doc.act1);
+        document.getElementById('block-act2').innerHTML = smartFormat(doc.act2);
         
         if (doc.act3) {
-            document.getElementById('block-act3').innerHTML = smartFormat(doc.act3, 'var(--accent-emerald)');
+            document.getElementById('block-act3').innerHTML = smartFormat(doc.act3);
             document.getElementById('wrap-act3').style.display = 'block';
         } else {
             document.getElementById('wrap-act3').style.display = 'none';
@@ -589,7 +584,6 @@
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('profile-screen').style.display = 'block';
 
-        // Reveal cards
         requestAnimationFrame(() => {
             document.querySelectorAll('[data-reveal]').forEach((card, i) => {
                 setTimeout(() => card.classList.add('revealed'), i * 120);
@@ -599,32 +593,60 @@
         setTimeout(animateMetrics, 400);
     }
 
-    function smartFormat(text, accentColor) {
-        if (!text) return '<div class="text-block" style="color:var(--text-tertiary);">Нет данных</div>';
+    function smartFormat(text) {
+        if (!text) return '<div class="text-block"><p style="color:var(--text-tertiary);">Нет данных</p></div>';
         
-        const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+        const paragraphs = text.split(/\n{2,}/);
         let html = '';
         
-        for (const line of lines) {
-            let escaped = line.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        for (const para of paragraphs) {
+            const trimmed = para.trim();
+            if (!trimmed) continue;
+            
+            let escaped = trimmed.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
             escaped = escaped.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-
-            if (/^[А-ЯЁ][А-ЯЁ\s\-]+:$/.test(escaped) && escaped.length < 50) {
-                html += `<div class="text-heading">${escaped.replace(/:$/,'')}</div>`;
+            
+            const lines = escaped.split('\n').map(l => l.trim()).filter(l => l);
+            if (lines.length === 0) continue;
+            
+            // Цитата
+            if (lines.length === 1 && (lines[0].startsWith('«') || lines[0].startsWith('"'))) {
+                html += `<div class="text-quote">${lines[0]}</div>`;
+                continue;
             }
-            else if ((escaped.startsWith('«') || escaped.startsWith('"')) && escaped.length > 15) {
-                html += `<div class="text-quote">${escaped}</div>`;
+            
+            // Нумерованный список
+            const isOrderedList = lines.length >= 2 && lines.every(l => /^\d+[\.\)]\s/.test(l));
+            if (isOrderedList) {
+                html += '<ol>';
+                for (const line of lines) {
+                    html += `<li>${line.replace(/^\d+[\.\)]\s*/, '')}</li>`;
+                }
+                html += '</ol>';
+                continue;
             }
-            else {
-                html += `<div class="text-block">${escaped}</div>`;
+            
+            // Маркированный список
+            const isUnorderedList = lines.length >= 2 && lines.every(l => /^[•\-\–]\s/.test(l));
+            if (isUnorderedList) {
+                html += '<ul>';
+                for (const line of lines) {
+                    html += `<li>${line.replace(/^[•\-\–]\s*/, '')}</li>`;
+                }
+                html += '</ul>';
+                continue;
             }
+            
+            // Обычный абзац
+            html += `<p>${lines.join(' ')}</p>`;
         }
-        return html;
+        
+        return `<div class="text-block">${html}</div>`;
     }
 
     function renderMetrics(metrics) {
         if (!metrics.length) {
-            document.getElementById('block-metrics').innerHTML = '<div class="text-block" style="color:var(--text-tertiary);">Метрики отсутствуют</div>';
+            document.getElementById('block-metrics').innerHTML = '<div class="text-block"><p style="color:var(--text-tertiary);">Метрики отсутствуют</p></div>';
             return;
         }
         let html = '';
