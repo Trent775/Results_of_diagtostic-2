@@ -15,8 +15,8 @@
         :root {
             /* Базовые цвета (светлая премиальная тема) */
             --bg-base: #f9f9f6;
-            --bg-glass: rgba(255, 255, 255, 0.75);
-            --border-subtle: rgba(0, 0, 0, 0.04);
+            --bg-glass: rgba(255, 255, 255, 0.85);
+            --border-subtle: rgba(0, 0, 0, 0.05);
             --border-medium: rgba(0, 0, 0, 0.08);
             
             /* Текст */
@@ -37,9 +37,9 @@
             --accent-violet-glow: rgba(124, 58, 237, 0.15);
             
             /* Тени и скругления */
-            --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.02);
-            --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.03);
-            --shadow-md: 0 10px 32px rgba(0, 0, 0, 0.04);
+            --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.03);
+            --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 10px 32px rgba(0, 0, 0, 0.05);
             --shadow-lg: 0 24px 64px rgba(0, 0, 0, 0.06);
             --radius-xs: 8px; 
             --radius-sm: 12px; 
@@ -172,7 +172,7 @@
             75% { transform: translateX(4px); }
         }
 
-        /* ================= Экран Профиля ================= */
+        /* ================= ЭКРАН ПРОФИЛЯ ================= */
         #profile-screen { display: none; }
         
         .reveal-anim {
@@ -240,12 +240,12 @@
         .card-protocol { border-left: 4px solid var(--accent-emerald); background: linear-gradient(135deg, rgba(5,150,105,0.015) 0%, var(--bg-glass) 50%); margin-bottom: 24px; }
         .card-tech { margin-bottom: 24px; }
 
-        /* ================= Текстовые блоки ================= */
+        /* ================= ТЕКСТОВЫЕ БЛОКИ ================= */
         .text-block { 
             font-size: 15px; 
             line-height: 1.7; 
             color: var(--text-primary); 
-            max-width: 680px; /* Оптимальная ширина для чтения */
+            max-width: 680px; 
         }
         
         .text-block p { margin-bottom: 16px; }
@@ -255,12 +255,12 @@
         
         /* Списки */
         .text-block ul, .text-block ol { 
-            margin: 16px 0; 
-            padding-left: 24px; 
+            margin: 16px 0 16px 20px; 
+            padding-left: 0; 
         }
         .text-block li { 
-            margin-bottom: 10px; 
-            padding-left: 6px;
+            margin-bottom: 12px; 
+            padding-left: 8px;
         }
         .text-block li::marker {
             color: var(--accent-blue);
@@ -279,7 +279,7 @@
             margin: 20px 0; 
         }
 
-        /* ================= Метрики (Графики) ================= */
+        /* ================= МЕТРИКИ (Графики) ================= */
         .metric-row { margin-bottom: 24px; }
         .metric-row:last-child { margin-bottom: 0; }
         
@@ -297,7 +297,7 @@
             100% { filter: brightness(1.2) drop-shadow(0 0 2px rgba(255,255,255,0.3)); } 
         }
 
-        /* ================= Теги (Бейджи) ================= */
+        /* ================= ТЕГИ (Бейджи) ================= */
         .badge-wrap { display: flex; flex-wrap: wrap; gap: 10px; }
         .badge {
             background: #ffffff; 
@@ -344,7 +344,7 @@
     <div id="profile-screen">
         <div class="top-bar reveal-anim" style="animation-delay: 0s;">
             <button class="btn-exit" onclick="lock()">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:-3px"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
                 Закрыть профиль
             </button>
         </div>
@@ -388,7 +388,7 @@
             <div id="block-act3"></div>
         </div>
 
-        <div class="card card-tech reveal-anim" id="wrap-tech" style="animation-delay: 0.6s;">
+        <div class="card card-tech reveal-anim" id="wrap-tech" style="animation-delay: 0.6s; display:none;">
             <div class="card-header">
                 <div class="card-dot dot-gray"></div>
                 <div class="card-label">Технические параметры</div>
@@ -403,7 +403,7 @@
     let TECH = null;
     let metricQueue = [];
 
-    // Загрузка данных при старте
+    // Инициализация при загрузке
     window.addEventListener('load', async () => {
         try {
             const resDB = await fetch('database.json');
@@ -433,8 +433,8 @@
     function showErr(msg) { 
         const el = document.getElementById('error-msg'); 
         el.textContent = msg; 
-        el.classList.remove('visible'); // Сброс анимации
-        void el.offsetWidth; // Триггер reflow
+        el.classList.remove('visible'); 
+        void el.offsetWidth; 
         el.classList.add('visible'); 
     }
     
@@ -442,21 +442,19 @@
         document.getElementById('error-msg').classList.remove('visible'); 
     }
 
-    // Умный поиск (Fuzzy Match) для обхода опечаток в ключах (например, "Иван Иванов т170")
+    // Умный поиск ключей (отсекает цифры, спецсимволы, пробелы)
     function fuzzyMatchKey(dictionary, targetKey) {
         if (!dictionary || !targetKey) return null;
-        if (dictionary[targetKey]) return dictionary[targetKey]; // Идеальное совпадение
+        if (dictionary[targetKey]) return dictionary[targetKey]; 
 
-        // Очищаем от цифр, пробелов, дефисов (оставляем только буквы)
         const normalize = str => str.toLowerCase().replace(/[^а-яёa-z]/gi, '');
         const targetNorm = normalize(targetKey);
         
         for (const key in dictionary) {
             const keyNorm = normalize(key);
             if (keyNorm === targetNorm) return dictionary[key];
-            if (targetNorm.length > 4 && (keyNorm.includes(targetNorm) || targetNorm.includes(keyNorm))) {
-                return dictionary[key];
-            }
+            if (targetNorm.length > 3 && keyNorm.includes(targetNorm)) return dictionary[key];
+            if (keyNorm.length > 3 && targetNorm.includes(keyNorm)) return dictionary[key];
         }
         return null;
     }
@@ -507,7 +505,7 @@
         metricQueue = [];
     }
 
-    // Базовое экранирование HTML от XSS
+    // Базовое экранирование HTML
     function escapeHtml(str) {
         return str
             .replace(/&/g, '&amp;')
@@ -517,132 +515,131 @@
             .replace(/\*(.+?)\*/g, '<em>$1</em>');
     }
 
-    // Стейт-машина для парсинга текста (Списки и Абзацы больше не слипаются!)
-    function parseTextToHtml(text) {
-        if (!text || text.trim().length < 5) return '<p style="color:var(--text-tertiary);">Нет данных</p>';
+    // Умный рендер текста (предотвращение "текстового кома")
+    // Разделяет текст на абзацы по двойному переносу строки, затем парсит списки
+    function smartFormat(text) {
+        if (!text || text.trim().length < 5) return '<div class="text-block"><p style="color:var(--text-tertiary);">Нет данных</p></div>';
 
         let html = '';
-        const lines = text.split('\n');
+        // Разбиваем текст на блоки (абзацы/списки), разделенные пустой строкой
+        const blocks = text.split(/\n\s*\n/); 
         
-        let inUl = false;
-        let inOl = false;
-
-        for (let i = 0; i < lines.length; i++) {
-            let line = lines[i].trim();
-            if (!line) continue;
-
-            // Сначала экранируем строку, чтобы избежать XSS
-            let safeLine = escapeHtml(line);
-
-            // Проверка на маркеры списков
-            const isUlItem = /^[-•–*]\s+(.*)/.exec(line);
-            const isOlItem = /^(\d+)[\.\)]\s+(.*)/.exec(line);
-
-            if (isUlItem) {
-                if (inOl) { html += '</ol>'; inOl = false; }
-                if (!inUl) { html += '<ul>'; inUl = true; }
-                // Передаем экранированную группу 1
-                const safeContent = escapeHtml(isUlItem[1]);
-                html += `<li>${safeContent}</li>`;
-            } 
-            else if (isOlItem) {
-                if (inUl) { html += '</ul>'; inUl = false; }
-                if (!inOl) { html += '<ol>'; inOl = true; }
-                const safeNum = escapeHtml(isOlItem[1]);
-                const safeContent = escapeHtml(isOlItem[2]);
-                html += `<li><strong>${safeNum}.</strong> ${safeContent}</li>`;
-            } 
-            else {
-                // Если это обычный текст, закрываем списки
-                if (inUl) { html += '</ul>'; inUl = false; }
-                if (inOl) { html += '</ol>'; inOl = false; }
-
-                // Цитата
-                if (line.startsWith('>') || line.startsWith('«') || line.startsWith('"')) {
-                    const safeQuote = escapeHtml(line.replace(/^[>«"]\s*/, ''));
-                    html += `<div class="text-quote">${safeQuote}</div>`;
-                } else {
-                    html += `<p>${safeLine}</p>`;
+        for (let block of blocks) {
+            block = block.trim();
+            if (!block) continue;
+            
+            // Если блок - маркированный список (есть строки, начинающиеся с • или -)
+            if (/^\s*[-•–*]\s+/m.test(block)) {
+                html += '<ul>';
+                // Разбиваем блок по маркерам
+                const items = block.split(/^\s*[-•–*]\s+/m).filter(i => i.trim());
+                for (let item of items) {
+                    // Убираем жесткие переносы строк внутри одного пункта меню
+                    item = item.replace(/\n/g, ' ').trim();
+                    html += `<li>${escapeHtml(item)}</li>`;
                 }
+                html += '</ul>';
+            }
+            // Если блок - нумерованный список (есть строки, начинающиеся с цифры и точки)
+            else if (/^\s*\d+[\.\)]\s+/m.test(block)) {
+                html += '<ol>';
+                const items = block.split(/^\s*\d+[\.\)]\s+/m).filter(i => i.trim());
+                let counter = 1;
+                for (let item of items) {
+                    item = item.replace(/\n/g, ' ').trim();
+                    // Восстанавливаем номер
+                    html += `<li>${escapeHtml(item)}</li>`;
+                    counter++;
+                }
+                html += '</ol>';
+            }
+            // Если блок - цитата
+            else if (block.startsWith('«') || block.startsWith('"') || block.startsWith('>')) {
+                block = block.replace(/\n/g, ' ').replace(/^[>«"]\s*|\s*[»"]$/g, '').trim();
+                html += `<div class="text-quote">${escapeHtml(block)}</div>`;
+            }
+            // Обычный абзац
+            else {
+                // Склеиваем разорванные строки внутри абзаца в один сплошной текст
+                block = block.replace(/\n/g, ' ').trim();
+                html += `<p>${escapeHtml(block)}</p>`;
             }
         }
         
-        // Закрываем висящие списки в конце текста
-        if (inUl) html += '</ul>';
-        if (inOl) html += '</ol>';
-
         return `<div class="text-block">${html}</div>`;
     }
 
-    // Идеальный экстрактор метрик. Строго 4 метрики. Защита от бреда LLM.
-    function extractMetrics(textLines) {
+    // Жесткий экстрактор метрик. Парсит только то, что связано с графиком.
+    function extractMetrics(lines) {
         const metrics = [];
-        const seenLabels = new Set(); // Защита от дублей названий
-
-        for (let line of textLines) {
-            let cleanLine = line.replace(/[*#█░]/g, '').trim();
+        let lastLabel = '';
+        
+        for (let line of lines) {
+            let cleanLine = line.trim();
+            if (!cleanLine) continue;
             
-            // Фильтр от мусора: если строка содержит эти слова, это не метрика
-            if (/колонк|строк|столбец/i.test(cleanLine)) continue;
-
-            // Строгая регулярка: Текст (от 3 до 55 символов, без точек) -> возможный разделитель -> Цифры -> %
-            const match = cleanLine.match(/^([^.!?]{3,55}?)\s*[:\-–—]?\s*(\d{1,3})\s*%$/);
-            
-            if (match) {
-                let label = match[1].replace(/^[-•–*\d.\)]+\s*/, '').trim(); // Убираем маркеры списка в начале
-                let val = parseInt(match[2], 10);
-                
-                if (val >= 0 && val <= 100 && label.length > 2) {
-                    let labelLower = label.toLowerCase();
-                    if (!seenLabels.has(labelLower)) {
-                        seenLabels.add(labelLower);
-                        metrics.push({ label, value: val });
-                    }
-                }
+            // Защита: как только дошли до инструкции "Как читать карту" - останавливаем парсинг
+            if (cleanLine.toUpperCase().includes('КАК ЧИТАТЬ ЭТУ КАРТУ') || cleanLine.includes('Первая полоска')) {
+                break;
             }
             
-            // Жесткий лимит: нам нужно ровно 4 метрики. Если LLM сгенерировала больше - отсекаем.
-            if (metrics.length === 4) break;
+            // Ищем строку с полоской прогресса и процентами (например: ██████░░░ 10%)
+            if (/[█░]/.test(cleanLine) && cleanLine.includes('%')) {
+                const pctMatch = cleanLine.match(/(\d{1,3})\s*%/);
+                if (pctMatch && lastLabel) {
+                    const val = parseInt(pctMatch[1], 10);
+                    // Добавляем метрику, если значение корректно
+                    if (val >= 0 && val <= 100) {
+                        metrics.push({ label: lastLabel, value: val });
+                    }
+                    lastLabel = ''; // Сбрасываем метку после использования
+                }
+            } else {
+                // Если это не полоска и не разделитель, запоминаем как возможное название графика
+                if (!cleanLine.startsWith('===') && !cleanLine.toUpperCase().includes('КАРТА НАПРЯЖЕНИЯ')) {
+                    // Очищаем от двоеточий на конце
+                    lastLabel = cleanLine.replace(/[:\-]+$/, '').trim();
+                }
+            }
         }
         return metrics;
     }
 
     function renderProfile(rawText, employeeName) {
         const sections = { portrait: [], tension: [], metrics: [], experiment: [] };
-        let currentSection = 'portrait'; 
+        let currentSection = null; 
         let name = employeeName;
         let role = 'Сотрудник';
 
         const lines = rawText.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
         
         for (const line of lines) {
-            const trimmed = line.trim();
-            if (!trimmed) continue;
+            const upperLine = line.trim().toUpperCase();
 
             // Извлечение заголовка (Имя / Должность)
-            if (trimmed.toUpperCase().startsWith('ПРОФИЛЬ:')) { 
-                name = trimmed.replace(/^ПРОФИЛЬ:/i, '').trim(); 
+            if (upperLine.startsWith('ПРОФИЛЬ:')) { 
+                name = line.replace(/^ПРОФИЛЬ:/i, '').trim(); 
                 continue; 
             }
-            if (trimmed.toUpperCase().startsWith('ДОЛЖНОСТЬ:')) { 
-                role = trimmed.replace(/^ДОЛЖНОСТЬ:/i, '').trim(); 
+            if (upperLine.startsWith('ДОЛЖНОСТЬ:')) { 
+                role = line.replace(/^ДОЛЖНОСТЬ:/i, '').trim(); 
                 continue; 
             }
             
-            // Игнор разделителей
-            if (/^[-=_*]{3,}$/.test(trimmed)) continue;
-
-            // Маршрутизация по секциям
-            let isHeader = false;
-            if (trimmed.startsWith('#') || (trimmed.length < 50 && (trimmed === trimmed.toUpperCase() || trimmed.endsWith(':') || trimmed.startsWith('**')))) {
-                if (/портрет|рабочая модель|личность/i.test(trimmed)) { currentSection = 'portrait'; isHeader = true; }
-                else if (/карта.*напряжен|метрики|показатели|шкал/i.test(trimmed)) { currentSection = 'metrics'; isHeader = true; }
-                else if (/зон.*напряжен|риск|энерги|слаб.*сторон/i.test(trimmed)) { currentSection = 'tension'; isHeader = true; }
-                else if (/эксперимент|попробовать|рекомендац/i.test(trimmed)) { currentSection = 'experiment'; isHeader = true; }
-            }
-
-            if (!isHeader) {
-                sections[currentSection].push(line);
+            // Смена секций по ключевым заголовкам
+            if (upperLine.includes('ВАШ ПОРТРЕТ')) { currentSection = 'portrait'; continue; }
+            if (upperLine.includes('ЧТО ЗАБИРАЕТ ВАШУ ЭНЕРГИЮ') || upperLine.includes('ГИПОТЕЗА СИСТЕМЫ')) { currentSection = 'tension'; continue; }
+            if (upperLine.includes('КАРТА НАПРЯЖЕНИЯ')) { currentSection = 'metrics'; continue; }
+            if (upperLine.includes('КАК ЭТО МОЖЕТ ВЫГЛЯДЕТЬ')) { currentSection = 'tension_example'; continue; }
+            if (upperLine.includes('ЧТО МОЖНО ПОПРОБОВАТЬ') || upperLine.includes('ЭКСПЕРИМЕНТ')) { currentSection = 'experiment'; continue; }
+            
+            // Сохраняем строки в нужный раздел, игнорируя разделители "==="
+            if (currentSection && !line.trim().startsWith('===')) {
+                if (currentSection === 'tension_example') {
+                    sections['tension'].push(line); // Склеиваем гипотезу и пример в один блок
+                } else {
+                    sections[currentSection].push(line);
+                }
             }
         }
 
@@ -650,25 +647,25 @@
         document.getElementById('h-name').textContent = name;
         document.getElementById('h-role').textContent = role;
 
-        document.getElementById('block-act1').innerHTML = parseTextToHtml(sections.portrait.join('\n'));
-        document.getElementById('block-act2').innerHTML = parseTextToHtml(sections.tension.join('\n'));
+        document.getElementById('block-act1').innerHTML = smartFormat(sections.portrait.join('\n'));
+        document.getElementById('block-act2').innerHTML = smartFormat(sections.tension.join('\n'));
         
         const experimentText = sections.experiment.join('\n');
-        if (experimentText.length > 20) {
-            document.getElementById('block-act3').innerHTML = parseTextToHtml(experimentText);
+        if (experimentText.trim().length > 10) {
+            document.getElementById('block-act3').innerHTML = smartFormat(experimentText);
             document.getElementById('wrap-act3').style.display = 'block';
         } else {
             document.getElementById('wrap-act3').style.display = 'none';
         }
 
-        // Метрики
+        // Рендер метрик
         const metrics = extractMetrics(sections.metrics);
         renderMetricsBlock(metrics);
 
-        // Технические параметры
+        // Рендер технических параметров
         renderTechBlock(name);
 
-        // Переключение экранов и запуск анимаций
+        // Показ экранов и запуск анимаций
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('profile-screen').style.display = 'block';
 
@@ -699,7 +696,7 @@
             html += `
                 <div class="metric-row">
                     <div class="metric-top">
-                        <span class="metric-name">${m.label}</span>
+                        <span class="metric-name">${escapeHtml(m.label)}</span>
                         <span class="metric-pct" style="color:${color};">${m.value}%</span>
                     </div>
                     <div class="metric-bar">
