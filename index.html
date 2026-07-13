@@ -569,13 +569,12 @@
         result.act3 = sections['experiment'].join('\n').trim();
         result.tech = sections['tech'].join('\n').trim();
         
-        // Парсим метрики только из блока "Карта натяжения"
         result.metrics = parseMetrics(sections['metrics'].join('\n'));
 
         return result;
     }
 
-    // ==================== ПАРСЕР МЕТРИК (Строго по 4 полоскам) ====================
+    // ==================== ПАРСЕР МЕТРИК ====================
 
     function parseMetrics(text) {
         const metrics = [];
@@ -587,20 +586,14 @@
             const trimmed = line.trim();
             if (!trimmed) continue;
             
-            // Ищем паттерны: "Первая полоска", "Вторая полоска" и т.д. 
-            // Дальше смотрим, есть ли в конце строки цифра с %.
-            // (например: "• Первая полоска (100%) — ваш внешний образ. Жёсткий")
-            const match = trimmed.match(/^[•\-]?\s*(Первая|Вторая|Третья|Четвёртая|Четвертая)\s*полоска.*?(\d+)\s*%/i);
-            
+            // Ищем процент в строке и пытаемся взять текст до него как название
+            const match = trimmed.match(/^(.*?)\s*\(?(\d+)\s*%\)?/);
             if (match) {
-                // Очищаем название: убираем "• Первая полоска (100%)"
-                let label = trimmed.replace(/^[•\-]?\s*(Первая|Вторая|Третья|Четвёртая|Четвертая)\s*полоска.*?(\d+)\s*%[—\-]?\s*/i, '').trim();
+                let label = match[1].replace(/^[•\-\–]\s*/, '').trim();
+                if (label.endsWith(':')) label = label.slice(0, -1).trim();
+                if (!label) label = 'Показатель';
                 
-                // Если после очистки строка пустая (бывает, если в конце просто тире), ставим заглушку
-                if (!label) label = `Уровень ${match[1].toLowerCase()}`;
-                
-                const val = parseInt(match[2]);
-                metrics.push({ label: label, value: val });
+                metrics.push({ label: label, value: parseInt(match[2]) });
             }
         }
         return metrics;
@@ -650,19 +643,20 @@
         setTimeout(animateMetrics, 400);
     }
 
-    // ==================== ФОРМАТТЕР ТЕКСТА (С поддержкой списков) ====================
+    // ==================== ФОРМАТТЕР ТЕКСТА (Сборка строк) ====================
 
     function smartFormat(text) {
         if (!text || text.length < 5) return '<div class="text-block"><p style="color:var(--text-tertiary);">Нет данных</p></div>';
         
+        // Разделяем на крупные абзацы по двум переносам
         const rawParagraphs = text.split(/\n\s*\n/);
         let html = '';
         
         for (const rawPara of rawParagraphs) {
-            const lines = rawPara.split('\n').map(l => l.trim()).filter(l => l);
+            const lines = rawPara.split('\n').map(l => l.trim()).filter(l => l.length > 0);
             if (lines.length === 0) continue;
             
-            // Проверяем, является ли этот параграф маркированным списком (начинается с •)
+            // Проверяем, является ли блок списком (все строки начинаются с •)
             const isUnorderedList = lines.every(l => /^[•\-\–]\s/.test(l));
             
             if (isUnorderedList) {
@@ -674,7 +668,7 @@
                 }
                 html += '</ul>';
             } else {
-                // Если это не список, склеиваем строки в один абзац
+                // Если это не список — склеиваем все строки в один связный абзац
                 const singleLine = lines.join(' ');
                 let escaped = singleLine.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
                 escaped = escaped.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
