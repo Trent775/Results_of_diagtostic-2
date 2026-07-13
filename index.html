@@ -195,7 +195,6 @@
         .card-dot.dot-amber { background: var(--accent-amber); box-shadow: 0 0 8px var(--accent-amber-glow); }
         .card-dot.dot-red { background: var(--accent-red); box-shadow: 0 0 8px var(--accent-red-glow); }
         .card-dot.dot-emerald { background: var(--accent-emerald); box-shadow: 0 0 8px var(--accent-emerald-glow); }
-        .card-dot.dot-gray { background: #8a8a8a; }
         .card-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.8px; color: var(--text-tertiary); }
 
         .card-risk { border-left: 3px solid var(--accent-red); background: linear-gradient(135deg, rgba(220,38,38,0.02) 0%, var(--bg-glass) 40%); margin-bottom: 24px; }
@@ -206,15 +205,6 @@
         .text-block ul, .text-block ol { margin: 10px 0 16px 0; padding-left: 22px; }
         .text-block li { margin-bottom: 7px; line-height: 1.65; font-size: 14px; }
         .text-block strong { color: var(--accent-blue); font-weight: 700; }
-
-        .text-quote {
-            background: linear-gradient(135deg, rgba(109,40,217,0.03), rgba(29,78,216,0.02));
-            border-left: 3px solid var(--accent-violet);
-            padding: 16px 20px; font-size: 14px; line-height: 1.7;
-            font-style: italic; color: var(--text-primary);
-            border-radius: 0 var(--radius-xs) var(--radius-xs) 0;
-            margin: 16px 0; max-width: 680px;
-        }
 
         .metric-row { margin-bottom: 18px; }
         .metric-row:last-child { margin-bottom: 0; }
@@ -286,8 +276,8 @@
             <div class="card-header"><div class="card-dot dot-emerald"></div><div class="card-label" style="color:var(--accent-emerald);">Эксперимент</div></div>
             <div id="block-act3"></div>
         </div>
-        <div class="card" data-reveal id="wrap-tech" style="display:none;">
-            <div class="card-header"><div class="card-dot dot-gray"></div><div class="card-label">Технические параметры</div></div>
+        <div class="card" data-reveal>
+            <div class="card-header"><div class="card-dot" style="background:#8a8a8a;"></div><div class="card-label">Технические параметры</div></div>
             <div class="badge-wrap" id="block-tech"></div>
         </div>
     </div>
@@ -323,32 +313,10 @@
     function showErr(m) { const el = document.getElementById('error-msg'); el.textContent = m; el.classList.add('visible'); }
     function hideErr() { document.getElementById('error-msg').classList.remove('visible'); }
 
-    // Универсальный нечеткий поиск ключа в объекте
-    function findMatch(dict, targetKey) {
-        if (!dict || !targetKey) return null;
-        if (dict[targetKey]) return dict[targetKey];
-
-        const normTarget = targetKey.toLowerCase().replace(/[^a-zа-яё]/gi, '');
-        
-        for (const k in dict) {
-            const normK = k.toLowerCase().replace(/[^a-zа-яё]/gi, '');
-            if (normK === normTarget) return dict[k];
-            if (normTarget.length > 5 && (normK.includes(normTarget) || normTarget.includes(normK))) {
-                return dict[k];
-            }
-            const partsTarget = targetKey.toLowerCase().replace(/[^a-zа-яё\s]/gi, '').trim().split(/\s+/);
-            if (partsTarget.length >= 2) {
-                const reversedTarget = partsTarget[1] + partsTarget[0];
-                if (normK.includes(reversedTarget)) return dict[k];
-            }
-        }
-        return null;
-    }
-
     function unlock() {
         hideErr();
         const rawToken = document.getElementById('token-input').value;
-        const token = rawToken.trim(); 
+        const token = rawToken.trim();
         
         if (!DB) { showErr('База загружается.'); return; }
         if (!token) { showErr('Введите токен.'); return; }
@@ -357,7 +325,7 @@
         if (lastDash === -1) { showErr('Формат токена неверен.'); return; }
         
         const uid = token.substring(0, lastDash).trim();
-        const enc = findMatch(DB, uid);
+        const enc = DB[uid];
         
         if (!enc) { showErr('Сотрудник не найден в базе.'); return; }
 
@@ -387,87 +355,121 @@
         metricQueue = [];
     }
 
-    // Распределение контента по блокам на основе ключевых слов-маркеров
+    // ==========================================================
+    // ПАРСИНГ ДОКУМЕНТА
+    // ==========================================================
     function parseDoc(raw) {
+        const clean = raw.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
         const result = { name: '', role: '', act1: '', act2: '', act3: '', metrics: [] };
-        let currentSection = 'act1'; 
         
-        const act1Lines = [];
-        const act2Lines = [];
-        const act3Lines = [];
-        const metricLines = [];
-
-        const lines = raw.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
+        const sections = { 
+            portrait: [], 
+            energy: [], 
+            metrics: [], 
+            example: [], 
+            experiment: [] 
+        };
+        
+        let currentKey = null;
+        const lines = clean.split('\n');
         
         for (const line of lines) {
             const trimmed = line.trim();
-            if (!trimmed) {
-                if (currentSection === 'act1') act1Lines.push('');
-                if (currentSection === 'act2') act2Lines.push('');
-                if (currentSection === 'act3') act3Lines.push('');
-                continue;
+            
+            if (trimmed.toUpperCase().startsWith('ПРОФИЛЬ:')) { 
+                result.name = trimmed.replace(/^ПРОФИЛЬ:/i, '').trim(); 
+                continue; 
             }
-
-            if (trimmed.toUpperCase().startsWith('ПРОФИЛЬ:')) { result.name = trimmed.replace(/^ПРОФИЛЬ:/i, '').trim(); continue; }
-            if (trimmed.toUpperCase().startsWith('ДОЛЖНОСТЬ:')) { result.role = trimmed.replace(/^ДОЛЖНОСТЬ:/i, '').trim(); continue; }
+            if (trimmed.toUpperCase().startsWith('ДОЛЖНОСТЬ:')) { 
+                result.role = trimmed.replace(/^ДОЛЖНОСТЬ:/i, '').trim(); 
+                continue; 
+            }
             if (/^[-=_*]{3,}$/.test(trimmed)) continue;
 
-            let isHeader = false;
-            if (trimmed.startsWith('#') || (trimmed.length < 50 && (trimmed === trimmed.toUpperCase() || trimmed.endsWith(':') || trimmed.startsWith('**')))) {
-                if (/портрет|рабочая модель|личность/i.test(trimmed)) { currentSection = 'act1'; isHeader = true; }
-                else if (/карта.*напряжен|метрики|показатели|шкал/i.test(trimmed)) { currentSection = 'metrics'; isHeader = true; }
-                else if (/зон.*напряжен|риск|энерги|слаб.*сторон/i.test(trimmed)) { currentSection = 'act2'; isHeader = true; }
-                else if (/эксперимент|попробовать|рекомендац/i.test(trimmed)) { currentSection = 'act3'; isHeader = true; }
-            }
+            // Поиск заголовков
+            if (trimmed.includes('ВАШ ПОРТРЕТ') || trimmed.includes('МОДЕЛЬ') && trimmed.length < 40) currentKey = 'portrait';
+            else if (trimmed.includes('ЭНЕРГИЮ') || trimmed.includes('ГИПОТЕЗА СИСТЕМЫ')) currentKey = 'energy';
+            else if (trimmed.includes('КАРТА НАПРЯЖЕНИЯ')) currentKey = 'metrics';
+            else if (trimmed.includes('ВЫГЛЯДЕТЬ')) currentKey = 'example';
+            else if (trimmed.includes('Эксперимент')) currentKey = 'experiment';
+            
+            if (currentKey === null) currentKey = 'portrait';
 
-            if (!isHeader) {
-                if (currentSection === 'act1') act1Lines.push(line);
-                else if (currentSection === 'metrics') metricLines.push(line);
-                else if (currentSection === 'act2') act2Lines.push(line);
-                else if (currentSection === 'act3') act3Lines.push(line);
+            if (currentKey) {
+                sections[currentKey].push(line);
             }
         }
 
-        result.act1 = act1Lines.join('\n').trim();
-        result.act2 = act2Lines.join('\n').trim();
-        result.act3 = act3Lines.join('\n').trim();
-        result.metrics = parseMetrics(metricLines.join('\n'));
+        result.act1 = sections['portrait'].join('\n').trim();
+        result.act2 = (sections['energy'].join('\n') + '\n\n' + sections['example'].join('\n')).trim();
+        result.act3 = sections['experiment'].join('\n').trim();
         
-        if (result.metrics.length === 0) {
-            result.metrics = parseMetrics(raw);
-        }
-
+        result.metrics = parseMetrics(sections['metrics'].join('\n'));
+        
         return result;
     }
 
-    // Изолированный и защищенный сбор метрик
+    // ==========================================================
+    // ПАРСИНГ МЕТРИК (Исправлен, чтобы убирать пустые названия)
+    // ==========================================================
     function parseMetrics(text) {
         const metrics = [];
         if (!text) return metrics;
-        const lines = text.split('\n');
         
-        for (let line of lines) {
-            let cleanLine = line.replace(/[*#█░]/g, '').trim();
-            // Регулярка: короткая строка (3-50 символов), опционально : или -, цифры и знак %
-            const match = cleanLine.match(/^([^.!?]{3,50}?)\s*[:\-]?\s*(\d{1,3})\s*%$/);
+        const lines = text.split('\n');
+        const patterns = ['Первая', 'Вторая', 'Третья', 'Четвертая', 'Четвёртая'];
+        const fallbackNames = ['Уровень 1', 'Уровень 2', 'Уровень 3', 'Уровень 4'];
+        
+        let nameIndex = 0;
+        
+        for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed) continue;
             
-            if (match) {
-                let label = match[1].replace(/^[-•–*\d.\)]+\s*/, '').trim();
-                let val = parseInt(match[2], 10);
-                
-                if (val > 0 && val <= 100 && label.length > 2) {
-                    // Защита от дублей
-                    if (!metrics.some(m => m.label.toLowerCase() === label.toLowerCase())) {
-                        metrics.push({ label, value: val });
+            // Проверяем, есть ли в строке одна из 4 полосок
+            let isMetric = false;
+            let matchedPattern = '';
+            for (const p of patterns) {
+                if (trimmed.includes(p)) { 
+                    isMetric = true; 
+                    matchedPattern = p;
+                    break; 
+                }
+            }
+            
+            if (isMetric) {
+                // Выдергиваем процент
+                const pctMatch = trimmed.match(/(\d{1,3})\s*%/);
+                if (pctMatch) {
+                    const val = parseInt(pctMatch[1], 10);
+                    
+                    // Вырезаем мусор из названия
+                    let label = trimmed.replace(/^[•\-\–]\s*/, '') // убрать буллит
+                                       .replace(/\(?\d+\s*%\)?\s*[—\-]?\s*/, '') // убрать цифру и %
+                                       .replace(new RegExp(matchedPattern + '\\s*полоска\\s*', 'i'), '') // убрать "Первая полоска"
+                                       .replace(/[—\-:]+$/, '') // убрать мусор с конца
+                                       .replace(/^[\(\s]+|[\)\s]+$/g, '') // убрать лишние скобки и пробелы по краям
+                                       .trim();
+                                       
+                    // Если после чистки строка пустая, берем запасное название
+                    if (!label || label === '(' || label === '') {
+                        label = fallbackNames[nameIndex % fallbackNames.length];
                     }
+                    
+                    metrics.push({ label, value: val });
+                    nameIndex++;
                 }
             }
         }
         return metrics;
     }
 
-    // Базовое экранирование HTML
+    // ==========================================================
+    // ФОРМАТТЕР ТЕКСТА (Исправлена обработка <br> и переносов)
+    // ==========================================================
     function escapeHtml(str) {
+        // Сначала экранируем спецсимволы, но сохраняем переносы строк.
+        // Заменяем &, <, > на сущности, но только если это не уже экранированный текст.
         return str
             .replace(/&/g, '&amp;')
             .replace(/</g, '&lt;')
@@ -476,48 +478,48 @@
             .replace(/\*(.+?)\*/g, '<em>$1</em>');
     }
 
-    // Машина состояний (State Machine) для корректного отображения списков и абзацев
     function smartFormat(text) {
-        if (!text || text.trim().length < 5) return '<div class="text-block"><p style="color:var(--text-tertiary);">Нет данных</p></div>';
-
-        let html = '<div class="text-block">';
-        const lines = text.split('\n');
-        let inUl = false;
-        let inOl = false;
-
-        for (let i = 0; i < lines.length; i++) {
-            let line = lines[i].trim();
-            if (!line) continue;
-
-            const ulMatch = line.match(/^[-•–*]\s+(.*)/);
-            const olMatch = line.match(/^(\d+)[\.\)]\s+(.*)/);
-
-            if (ulMatch) {
-                if (inOl) { html += '</ol>'; inOl = false; }
-                if (!inUl) { html += '<ul>'; inUl = true; }
-                html += `<li>${escapeHtml(ulMatch[1])}</li>`;
-            } else if (olMatch) {
-                if (inUl) { html += '</ul>'; inUl = false; }
-                if (!inOl) { html += '<ol>'; inOl = true; }
-                html += `<li><strong>${olMatch[1]}.</strong> ${escapeHtml(olMatch[2])}</li>`;
-            } else {
-                if (inUl) { html += '</ul>'; inUl = false; }
-                if (inOl) { html += '</ol>'; inOl = false; }
-
-                if (line.startsWith('<') || line.startsWith('>') || line.startsWith('«') || line.startsWith('"')) {
-                    html += `<div class="text-quote">${escapeHtml(line.replace(/^[>«"]\s*/, ''))}</div>`;
-                } else {
-                    html += `<p>${escapeHtml(line)}</p>`;
+        if (!text || text.length < 5) return '<div class="text-block"><p style="color:var(--text-tertiary);">Нет данных</p></div>';
+        
+        const rawParagraphs = text.split(/\n\s*\n/);
+        let html = '';
+        
+        for (const rawPara of rawParagraphs) {
+            const lines = rawPara.split('\n').map(l => l.trim()).filter(l => l);
+            if (lines.length === 0) continue;
+            
+            // Проверяем маркированный список
+            const isUnorderedList = lines.every(l => /^[•\-\–]\s/.test(l));
+            
+            if (isUnorderedList) {
+                html += '<ul>';
+                for (const line of lines) {
+                    html += `<li>${escapeHtml(line.replace(/^[•\-\–]\s*/, ''))}</li>`;
                 }
+                html += '</ul>';
+            } 
+            // Проверяем нумерованный список
+            else if (lines.every(l => /^\d+[\.\)]\s/.test(l))) {
+                html += '<ol>';
+                for (const line of lines) {
+                    html += `<li>${escapeHtml(line.replace(/^\d+[\.\)]\s*/, ''))}</li>`;
+                }
+                html += '</ol>';
+            } 
+            else {
+                // Обычный параграф - объединяем строки через <br>, чтобы сохранить исходные переносы.
+                // Это исправит проблему с "лидера-машину:<br>стопроцентное"
+                const content = lines.join('<br>');
+                html += `<p>${escapeHtml(content)}</p>`;
             }
         }
-        if (inUl) html += '</ul>';
-        if (inOl) html += '</ol>';
-
-        html += '</div>';
-        return html;
+        
+        return `<div class="text-block">${html}</div>`;
     }
 
+    // ==========================================================
+    // РЕНДЕРИНГ
+    // ==========================================================
     function render(raw, uid) {
         const doc = parseDoc(raw);
         
@@ -525,20 +527,32 @@
         document.getElementById('h-name').textContent = displayName;
         document.getElementById('h-role').textContent = doc.role || 'Сотрудник компании';
 
-        const info = findMatch(TECH, doc.name) || findMatch(TECH, uid);
+        // Технические параметры
+        let info = null;
+        if (TECH) {
+            if (TECH[displayName]) info = TECH[displayName];
+            else if (TECH[uid]) info = TECH[uid];
+            else {
+                for (const key in TECH) {
+                    if (key.includes(displayName) || displayName.includes(key)) {
+                        info = TECH[key];
+                        break;
+                    }
+                }
+            }
+        }
         
         if (info) {
             const badges = [];
-            badges.push(`Статус: ${info.status}`);
+            if (info.status) badges.push(`Статус: ${info.status}`);
             if (info.medianTime) badges.push(`Время ответа: ${info.medianTime}`);
             if (info.blurCount > 0) badges.push(`Переключений вкладок: ${info.blurCount}`);
             if (info.flatlining) badges.push(`Паттерн: flatlining`);
             if (info.dominantScales && info.dominantScales.length) badges.push(...info.dominantScales);
             if (info.discProfile) badges.push(`DISC: ${info.discProfile}`);
             document.getElementById('block-tech').innerHTML = badges.map(t => `<span class="badge">${t}</span>`).join('');
-            document.getElementById('wrap-tech').style.display = 'block';
         } else {
-            document.getElementById('wrap-tech').style.display = 'none';
+            document.getElementById('block-tech').innerHTML = '<span class="badge">Технические данные отсутствуют</span>';
         }
 
         document.getElementById('block-act1').innerHTML = smartFormat(doc.act1);
@@ -552,42 +566,4 @@
         }
 
         renderMetrics(doc.metrics);
-        document.getElementById('login-screen').style.display = 'none';
-        document.getElementById('profile-screen').style.display = 'block';
-
-        requestAnimationFrame(() => {
-            document.querySelectorAll('[data-reveal]').forEach((card, i) => {
-                setTimeout(() => card.classList.add('revealed'), i * 120);
-            });
-        });
-        setTimeout(animateMetrics, 400);
-    }
-
-    function renderMetrics(metrics) {
-        if (!metrics || !metrics.length) {
-            document.getElementById('block-metrics').innerHTML = '<div class="text-block"><p style="color:var(--text-tertiary);">Метрики не обнаружены</p></div>';
-            return;
-        }
-        let html = '';
-        metrics.forEach((m, i) => {
-            let color, glow;
-            if (m.value >= 80) { color = '#dc2626'; glow = 'rgba(220,38,38,0.5)'; }
-            else if (m.value >= 50) { color = '#d97706'; glow = 'rgba(217,119,6,0.45)'; }
-            else if (m.value <= 20) { color = '#059669'; glow = 'rgba(5,150,105,0.4)'; }
-            else { color = '#2563eb'; glow = 'rgba(37,99,235,0.4)'; }
-            html += `<div class="metric-row"><div class="metric-top"><span class="metric-name">${m.label}</span><span class="metric-pct" style="color:${color};">${m.value}%</span></div><div class="metric-bar"><div class="metric-fill animated" id="m-${i}" style="background:${color};box-shadow:0 0 14px ${glow};"></div></div></div>`;
-            metricQueue.push({ id: `m-${i}`, width: m.value });
-        });
-        document.getElementById('block-metrics').innerHTML = html;
-    }
-
-    function animateMetrics() {
-        metricQueue.forEach(item => {
-            const el = document.getElementById(item.id);
-            if (el) el.style.width = item.width + '%';
-        });
-        metricQueue = [];
-    }
-</script>
-</body>
-</html>
+        document.getElementById('login-screen').style.display =
