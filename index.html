@@ -370,17 +370,26 @@
         }
 
         /* ============ BADGES ============ */
-        .badge-wrap { display: flex; flex-wrap: wrap; gap: 8px; }
+        .badge-wrap { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 8px; 
+        }
         .badge {
-            background: #f4f2ef; padding: 7px 14px; border-radius: 20px;
-            font-size: 11.5px; font-weight: 500; color: var(--text-secondary);
-            border: 1px solid var(--border-subtle);
-            font-family: 'JetBrains Mono', 'SF Mono', monospace;
+            background: #f0efed; 
+            padding: 8px 16px; 
+            border-radius: 20px;
+            font-size: 12px; 
+            font-weight: 500; 
+            color: var(--text-secondary);
+            border: 1px solid var(--border-medium);
             transition: all 0.25s var(--ease-out-expo);
         }
         .badge:hover {
-            background: #fff; border-color: var(--border-medium);
-            color: var(--text-primary); box-shadow: var(--shadow-xs);
+            background: #fff; 
+            border-color: #ccc;
+            color: var(--text-primary); 
+            box-shadow: var(--shadow-xs);
         }
 
         @media (max-width: 600px) {
@@ -509,7 +518,7 @@
         metricQueue = [];
     }
 
-    // ==================== ПАРСЕР ДОКУМЕНТА (ФИНАЛЬНЫЙ) ====================
+    // ==================== ПАРСЕР ДОКУМЕНТА ====================
 
     function parseDoc(raw) {
         const clean = raw.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
@@ -538,81 +547,63 @@
         for (const line of lines) {
             const trimmed = line.trim();
             
-            // Имя и должность
             if (line.startsWith('ПРОФИЛЬ:')) result.name = line.replace('ПРОФИЛЬ:', '').trim();
             else if (line.startsWith('ДОЛЖНОСТЬ:')) result.role = line.replace('ДОЛЖНОСТЬ:', '').trim();
             
-            // Определяем секцию по ключевым словам
             else if (trimmed.includes('ВАШ ПОРТРЕТ')) currentKey = 'portrait';
             else if (trimmed.includes('ЭНЕРГИЮ') || trimmed.includes('ГИПОТЕЗА')) currentKey = 'energy';
-            else if (trimmed.includes('КАРТА НАПРЯЖЕНИЯ')) currentKey = 'metrics'; // Карта натяжения
+            else if (trimmed.includes('КАРТА НАПРЯЖЕНИЯ')) currentKey = 'metrics';
             else if (trimmed.includes('ВЫГЛЯДЕТЬ')) currentKey = 'example';
             else if (trimmed.includes('Эксперимент') || trimmed.includes('ПОПРОБОВАТЬ')) currentKey = 'experiment';
             else if (trimmed.includes('ТЕХНИЧЕСКИЕ ПАРАМЕТРЫ')) currentKey = 'tech';
             
-            // Пропускаем разделители
             else if (trimmed.startsWith('===') || trimmed.startsWith('---')) continue;
             
-            // Добавляем строку в текущую секцию (не трогая служебные строки)
             else if (currentKey && !trimmed.startsWith('ПРОФИЛЬ:') && !trimmed.startsWith('ДОЛЖНОСТЬ:')) {
                 sections[currentKey].push(line);
             }
         }
 
-        // Склеиваем массивы строк в текст
         result.act1 = sections['portrait'].join('\n').trim();
         result.act2 = (sections['energy'].join('\n') + '\n\n' + sections['example'].join('\n')).trim();
         result.act3 = sections['experiment'].join('\n').trim();
         result.tech = sections['tech'].join('\n').trim();
         
-        // Парсим метрики (ищем числа во всем сыром тексте документа, но не трогая сам текст)
-        // Это гарантирует, что текст останется нетронутым, а цифры мы просто продублируем в графики.
-        // Секция metrics = sections['metrics'].join('\n'), берем только её для поиска чисел.
+        // Парсим метрики только из блока "Карта натяжения"
         result.metrics = parseMetrics(sections['metrics'].join('\n'));
 
         return result;
     }
 
-    // ==================== ПАРСЕР МЕТРИК ====================
+    // ==================== ПАРСЕР МЕТРИК (Строго по 4 полоскам) ====================
 
     function parseMetrics(text) {
         const metrics = [];
         if (!text) return metrics;
         
         const lines = text.split('\n');
-        let currentLabel = null;
-        let currentVal = null;
         
         for (const line of lines) {
             const trimmed = line.trim();
             if (!trimmed) continue;
             
-            // Ищем процентиль в строке
-            const percentMatch = extractPercent(trimmed);
+            // Ищем паттерны: "Первая полоска", "Вторая полоска" и т.д. 
+            // Дальше смотрим, есть ли в конце строки цифра с %.
+            // (например: "• Первая полоска (100%) — ваш внешний образ. Жёсткий")
+            const match = trimmed.match(/^[•\-]?\s*(Первая|Вторая|Третья|Четвёртая|Четвертая)\s*полоска.*?(\d+)\s*%/i);
             
-            if (percentMatch !== null) {
-                // Убираем мусор вокруг числа, чтобы получить чистое название метрики
-                let label = trimmed.replace(/(\d+)(?:-й)?\s*(?:процентиль|%)?/i, '').trim();
-                label = label.replace(/[—\-:;]+$/, '').trim();
+            if (match) {
+                // Очищаем название: убираем "• Первая полоска (100%)"
+                let label = trimmed.replace(/^[•\-]?\s*(Первая|Вторая|Третья|Четвёртая|Четвертая)\s*полоска.*?(\d+)\s*%[—\-]?\s*/i, '').trim();
                 
-                if (label) {
-                    metrics.push({ label: label, value: percentMatch });
-                }
+                // Если после очистки строка пустая (бывает, если в конце просто тире), ставим заглушку
+                if (!label) label = `Уровень ${match[1].toLowerCase()}`;
+                
+                const val = parseInt(match[2]);
+                metrics.push({ label: label, value: val });
             }
         }
         return metrics;
-    }
-
-    function extractPercent(text) {
-        // 1. Ищем "80-й процентиль" или "80-й процентиль)"
-        let m1 = text.match(/(\d+)(?:-й)?\s*(?:процентиль|%)/i);
-        if (m1) return parseInt(m1[1]);
-        
-        // 2. Ищем █████░░░░░ 80%
-        let m2 = text.match(/[█░]+\s*(\d+)\s*%/);
-        if (m2) return parseInt(m2[1]);
-        
-        return null;
     }
 
     // ==================== РЕНДЕРИНГ ====================
@@ -623,10 +614,9 @@
         document.getElementById('h-name').textContent = doc.name || '—';
         document.getElementById('h-role').textContent = doc.role || '—';
 
-        // Вывод технических параметров (бейджи)
+        // Технические параметры
         if (doc.tech) {
-            // Просто разбиваем строку по запятым или переносам на отдельные бейджи
-            const techItems = doc.tech.split(/\n|,/).map(t => t.trim()).filter(t => t);
+            const techItems = doc.tech.split(/\n|,/).map(t => t.trim()).filter(t => t.length > 0);
             if (techItems.length) {
                 document.getElementById('block-tech').innerHTML = techItems.map(t => `<span class="badge">${t}</span>`).join('');
             } else {
@@ -660,7 +650,7 @@
         setTimeout(animateMetrics, 400);
     }
 
-    // ==================== ФОРМАТТЕР ТЕКСТА ====================
+    // ==================== ФОРМАТТЕР ТЕКСТА (С поддержкой списков) ====================
 
     function smartFormat(text) {
         if (!text || text.length < 5) return '<div class="text-block"><p style="color:var(--text-tertiary);">Нет данных</p></div>';
@@ -672,16 +662,22 @@
             const lines = rawPara.split('\n').map(l => l.trim()).filter(l => l);
             if (lines.length === 0) continue;
             
-            // Собираем обратно в строку, чтобы не было разрывов
-            const singleLine = lines.join(' ');
+            // Проверяем, является ли этот параграф маркированным списком (начинается с •)
+            const isUnorderedList = lines.every(l => /^[•\-\–]\s/.test(l));
             
-            let escaped = singleLine.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-            escaped = escaped.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-            
-            // Проверяем список (по цифре в начале)
-            if (/^\d+[\.\)]\s/.test(escaped)) {
-                html += `<p>${escaped}</p>`;
+            if (isUnorderedList) {
+                html += '<ul>';
+                for (const line of lines) {
+                    let escaped = line.replace(/^[•\-\–]\s*/, '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+                    escaped = escaped.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+                    html += `<li>${escaped}</li>`;
+                }
+                html += '</ul>';
             } else {
+                // Если это не список, склеиваем строки в один абзац
+                const singleLine = lines.join(' ');
+                let escaped = singleLine.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+                escaped = escaped.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
                 html += `<p>${escaped}</p>`;
             }
         }
