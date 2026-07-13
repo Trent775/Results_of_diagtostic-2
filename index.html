@@ -61,7 +61,6 @@
 
         .container { max-width: 1000px; width: 100%; margin-top: 20px; }
 
-        /* ============ LOGIN SCREEN ============ */
         #login-screen {
             margin-top: 14vh;
             text-align: center;
@@ -182,7 +181,6 @@
         }
         .error-msg.visible { display: block; }
 
-        /* ============ DASHBOARD ============ */
         #profile-screen {
             display: none;
             animation: dashboardReveal 0.8s var(--ease-out-expo);
@@ -211,7 +209,6 @@
             box-shadow: var(--shadow-sm); transform: translateX(-3px);
         }
 
-        /* ============ HERO CARD ============ */
         .hero-card {
             background: var(--bg-glass);
             backdrop-filter: blur(20px);
@@ -243,13 +240,11 @@
             letter-spacing: 2.5px; color: var(--accent-blue); margin-top: 4px;
         }
 
-        /* ============ GRID ============ */
         .grid-2col {
             display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;
         }
         @media (max-width: 800px) { .grid-2col { grid-template-columns: 1fr; } }
 
-        /* ============ CARDS ============ */
         .card {
             background: var(--bg-glass);
             backdrop-filter: blur(20px);
@@ -263,24 +258,15 @@
             opacity: 0;
             transform: translateY(30px);
         }
-        .card.revealed {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        .card:hover {
-            box-shadow: var(--shadow-lg);
-            transform: translateY(-3px);
-        }
+        .card.revealed { opacity: 1; transform: translateY(0); }
+        .card:hover { box-shadow: var(--shadow-lg); transform: translateY(-3px); }
 
         .card-header {
             display: flex; align-items: center; gap: 10px;
             margin-bottom: 18px; padding-bottom: 14px;
             border-bottom: 1px solid var(--border-subtle);
         }
-        .card-dot {
-            width: 10px; height: 10px; border-radius: 50%;
-            flex-shrink: 0;
-        }
+        .card-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
         .card-dot.dot-blue { background: var(--accent-blue); box-shadow: 0 0 8px var(--accent-blue-glow); }
         .card-dot.dot-amber { background: var(--accent-amber); box-shadow: 0 0 8px var(--accent-amber-glow); }
         .card-dot.dot-red { background: var(--accent-red); box-shadow: 0 0 8px var(--accent-red-glow); }
@@ -301,33 +287,16 @@
             margin-bottom: 24px;
         }
 
-        /* ============ TEXT RENDERING ============ */
         .text-block {
             font-size: 14px;
             line-height: 1.75;
             color: var(--text-primary);
             max-width: 680px;
         }
-
-        .text-block p {
-            margin-bottom: 14px;
-        }
-
-        .text-block ul, .text-block ol {
-            margin: 10px 0 16px 0;
-            padding-left: 22px;
-        }
-
-        .text-block li {
-            margin-bottom: 7px;
-            line-height: 1.65;
-            font-size: 14px;
-        }
-
-        .text-block strong {
-            color: var(--accent-blue);
-            font-weight: 700;
-        }
+        .text-block p { margin-bottom: 14px; }
+        .text-block ul, .text-block ol { margin: 10px 0 16px 0; padding-left: 22px; }
+        .text-block li { margin-bottom: 7px; line-height: 1.65; font-size: 14px; }
+        .text-block strong { color: var(--accent-blue); font-weight: 700; }
 
         .text-quote {
             background: linear-gradient(135deg, rgba(109,40,217,0.03), rgba(29,78,216,0.02));
@@ -342,7 +311,6 @@
             max-width: 680px;
         }
 
-        /* ============ METRICS ============ */
         .metric-row { margin-bottom: 18px; }
         .metric-row:last-child { margin-bottom: 0; }
         .metric-top {
@@ -361,36 +329,20 @@
             height: 100%; border-radius: 5px; width: 0;
             transition: width 2s var(--ease-out-expo);
         }
-        .metric-fill.animated {
-            animation: barGlow 3s ease-in-out infinite;
-        }
+        .metric-fill.animated { animation: barGlow 3s ease-in-out infinite; }
         @keyframes barGlow {
             0%, 100% { filter: brightness(1) saturate(1); }
             50% { filter: brightness(1.3) saturate(1.2); }
         }
 
-        /* ============ BADGES ============ */
-        .badge-wrap { 
-            display: flex; 
-            flex-wrap: wrap; 
-            gap: 8px; 
-        }
+        .badge-wrap { display: flex; flex-wrap: wrap; gap: 8px; }
         .badge {
-            background: #f0efed; 
-            padding: 8px 16px; 
-            border-radius: 20px;
-            font-size: 12px; 
-            font-weight: 500; 
-            color: var(--text-secondary);
+            background: #f0efed; padding: 8px 16px; border-radius: 20px;
+            font-size: 12px; font-weight: 500; color: var(--text-secondary);
             border: 1px solid var(--border-medium);
             transition: all 0.25s var(--ease-out-expo);
         }
-        .badge:hover {
-            background: #fff; 
-            border-color: #ccc;
-            color: var(--text-primary); 
-            box-shadow: var(--shadow-xs);
-        }
+        .badge:hover { background: #fff; border-color: #ccc; color: var(--text-primary); box-shadow: var(--shadow-xs); }
 
         @media (max-width: 600px) {
             .hero-card { padding: 24px 20px; }
@@ -403,8 +355,6 @@
 <body>
 
 <div class="container">
-
-    <!-- ============ LOGIN SCREEN ============ -->
     <div id="login-screen">
         <div class="login-orb orb-1"></div>
         <div class="login-orb orb-2"></div>
@@ -419,17 +369,14 @@
         </div>
     </div>
 
-    <!-- ============ DASHBOARD ============ -->
     <div id="profile-screen">
         <div class="top-bar">
             <button class="btn-exit" onclick="lock()">← Выйти</button>
         </div>
-
         <div class="hero-card">
             <div class="hero-name" id="h-name">—</div>
             <div class="hero-role" id="h-role">—</div>
         </div>
-
         <div class="grid-2col">
             <div class="card" data-reveal>
                 <div class="card-header"><div class="card-dot dot-blue"></div><div class="card-label">Рабочая модель</div></div>
@@ -440,23 +387,19 @@
                 <div id="block-metrics"></div>
             </div>
         </div>
-
         <div class="card card-risk" data-reveal>
             <div class="card-header"><div class="card-dot dot-red"></div><div class="card-label" style="color:var(--accent-red);">Зона напряжения</div></div>
             <div id="block-act2"></div>
         </div>
-
         <div class="card card-protocol" data-reveal id="wrap-act3">
             <div class="card-header"><div class="card-dot dot-emerald"></div><div class="card-label" style="color:var(--accent-emerald);">Эксперимент</div></div>
             <div id="block-act3"></div>
         </div>
-
         <div class="card" data-reveal>
             <div class="card-header"><div class="card-dot" style="background:#8a8a8a;"></div><div class="card-label">Технические параметры</div></div>
             <div class="badge-wrap" id="block-tech"></div>
         </div>
     </div>
-
 </div>
 
 <script>
@@ -472,7 +415,7 @@
             document.getElementById('error-msg').textContent = 'База данных недоступна.';
             document.getElementById('error-msg').classList.add('visible');
         }
-        const saved = sessionStorage.getItem('am_token_v3');
+        const saved = sessionStorage.getItem('am_token_v4');
         if (saved && DB) { document.getElementById('token-input').value = saved; unlock(); }
     });
 
@@ -489,12 +432,11 @@
         const token = document.getElementById('token-input').value.trim();
         if (!DB) { showErr('База загружается.'); return; }
         if (!token) { showErr('Введите токен.'); return; }
-
         const lastDash = token.lastIndexOf('-');
         if (lastDash === -1) { showErr('Формат токена неверен.'); return; }
         const uid = token.substring(0, lastDash);
         const enc = DB[uid] || DB[uid.replace(/_/g,' ')] || DB[uid.replace(/ /g,'_')];
-        if (!enc) { showErr('Субъект не найден.'); return; }
+        if (!enc) { showErr('Сотрудник не найден.'); return; }
 
         let raw;
         try {
@@ -505,12 +447,12 @@
             if (!raw || !raw.includes('ПРОФИЛЬ:')) throw new Error();
         } catch (_) { showErr('Ключ недействителен.'); return; }
 
-        sessionStorage.setItem('am_token_v3', token);
+        sessionStorage.setItem('am_token_v4', token);
         render(raw);
     }
 
     function lock() {
-        sessionStorage.removeItem('am_token_v3');
+        sessionStorage.removeItem('am_token_v4');
         document.getElementById('login-screen').style.display = 'block';
         document.getElementById('profile-screen').style.display = 'none';
         document.getElementById('token-input').value = '';
@@ -518,103 +460,76 @@
         metricQueue = [];
     }
 
-    // ==================== ПАРСЕР ДОКУМЕНТА ====================
-
     function parseDoc(raw) {
         const clean = raw.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-        const result = { 
-            name: '', 
-            role: '', 
-            tech: [], 
-            act1: '', 
-            act2: '', 
-            act3: '', 
-            metrics: [] 
-        };
-
-        const sections = {
-            'portrait': [],
-            'energy': [],
-            'metrics': [],
-            'example': [],
-            'experiment': [],
-            'tech': []
-        };
-        
+        const result = { name: '', role: '', tech: [], act1: '', act2: '', act3: '', metrics: [] };
+        const sections = { 'portrait': [], 'energy': [], 'metrics': [], 'example': [], 'experiment': [], 'tech': [] };
         let currentKey = null;
         const lines = clean.split('\n');
         
         for (const line of lines) {
             const trimmed = line.trim();
-            
             if (line.startsWith('ПРОФИЛЬ:')) result.name = line.replace('ПРОФИЛЬ:', '').trim();
             else if (line.startsWith('ДОЛЖНОСТЬ:')) result.role = line.replace('ДОЛЖНОСТЬ:', '').trim();
-            
             else if (trimmed.includes('ВАШ ПОРТРЕТ')) currentKey = 'portrait';
             else if (trimmed.includes('ЭНЕРГИЮ') || trimmed.includes('ГИПОТЕЗА')) currentKey = 'energy';
             else if (trimmed.includes('КАРТА НАПРЯЖЕНИЯ')) currentKey = 'metrics';
             else if (trimmed.includes('ВЫГЛЯДЕТЬ')) currentKey = 'example';
             else if (trimmed.includes('Эксперимент') || trimmed.includes('ПОПРОБОВАТЬ')) currentKey = 'experiment';
             else if (trimmed.includes('ТЕХНИЧЕСКИЕ ПАРАМЕТРЫ')) currentKey = 'tech';
-            
             else if (trimmed.startsWith('===') || trimmed.startsWith('---')) continue;
-            
-            else if (currentKey && !trimmed.startsWith('ПРОФИЛЬ:') && !trimmed.startsWith('ДОЛЖНОСТЬ:')) {
-                sections[currentKey].push(line);
-            }
+            else if (currentKey) sections[currentKey].push(line);
         }
 
         result.act1 = sections['portrait'].join('\n').trim();
         result.act2 = (sections['energy'].join('\n') + '\n\n' + sections['example'].join('\n')).trim();
         result.act3 = sections['experiment'].join('\n').trim();
-        result.tech = sections['tech'].join('\n').trim();
+        
+        const techRaw = sections['tech'].join('\n').trim();
+        if (techRaw) {
+            result.tech = techRaw.split('\n').map(t => t.trim()).filter(t => t.length > 0 && !t.startsWith('==='));
+        }
         
         result.metrics = parseMetrics(sections['metrics'].join('\n'));
-
         return result;
     }
-
-    // ==================== ПАРСЕР МЕТРИК ====================
 
     function parseMetrics(text) {
         const metrics = [];
         if (!text) return metrics;
-        
         const lines = text.split('\n');
         
-        for (const line of lines) {
-            const trimmed = line.trim();
+        for (let i = 0; i < lines.length; i++) {
+            const trimmed = lines[i].trim();
             if (!trimmed) continue;
-            
-            // Ищем процент в строке и пытаемся взять текст до него как название
-            const match = trimmed.match(/^(.*?)\s*\(?(\d+)\s*%\)?/);
-            if (match) {
-                let label = match[1].replace(/^[•\-\–]\s*/, '').trim();
-                if (label.endsWith(':')) label = label.slice(0, -1).trim();
-                if (!label) label = 'Показатель';
-                
-                metrics.push({ label: label, value: parseInt(match[2]) });
+            const pctMatch = trimmed.match(/(\d+)\s*%/);
+            if (pctMatch) {
+                const val = parseInt(pctMatch[1]);
+                if (val <= 0 || val > 100) continue;
+                let label = '';
+                const labelMatch = trimmed.match(/^(.+?):\s*[█░]*\s*\d+\s*%/);
+                if (labelMatch) {
+                    label = labelMatch[1].trim();
+                } else {
+                    for (let j = i - 1; j >= 0; j--) {
+                        const prev = lines[j].trim();
+                        if (prev.endsWith(':')) { label = prev.replace(/:$/, '').trim(); break; }
+                        if (prev.length === 0) break;
+                    }
+                }
+                if (label) metrics.push({ label, value: val });
             }
         }
         return metrics;
     }
 
-    // ==================== РЕНДЕРИНГ ====================
-
     function render(raw) {
         const doc = parseDoc(raw);
-
         document.getElementById('h-name').textContent = doc.name || '—';
         document.getElementById('h-role').textContent = doc.role || '—';
 
-        // Технические параметры
-        if (doc.tech) {
-            const techItems = doc.tech.split(/\n|,/).map(t => t.trim()).filter(t => t.length > 0);
-            if (techItems.length) {
-                document.getElementById('block-tech').innerHTML = techItems.map(t => `<span class="badge">${t}</span>`).join('');
-            } else {
-                document.getElementById('block-tech').innerHTML = '<span class="badge">Нет данных</span>';
-            }
+        if (doc.tech.length) {
+            document.getElementById('block-tech').innerHTML = doc.tech.map(t => `<span class="badge">${t}</span>`).join('');
         } else {
             document.getElementById('block-tech').innerHTML = '<span class="badge">Нет данных</span>';
         }
@@ -630,7 +545,6 @@
         }
 
         renderMetrics(doc.metrics);
-
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('profile-screen').style.display = 'block';
 
@@ -639,47 +553,57 @@
                 setTimeout(() => card.classList.add('revealed'), i * 120);
             });
         });
-
         setTimeout(animateMetrics, 400);
     }
 
-    // ==================== ФОРМАТТЕР ТЕКСТА (Сборка строк) ====================
-
     function smartFormat(text) {
         if (!text || text.length < 5) return '<div class="text-block"><p style="color:var(--text-tertiary);">Нет данных</p></div>';
-        
-        // Разделяем на крупные абзацы по двум переносам
         const rawParagraphs = text.split(/\n\s*\n/);
         let html = '';
         
         for (const rawPara of rawParagraphs) {
-            const lines = rawPara.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+            const lines = rawPara.split('\n').map(l => l.trim()).filter(l => l);
             if (lines.length === 0) continue;
             
-            // Проверяем, является ли блок списком (все строки начинаются с •)
-            const isUnorderedList = lines.every(l => /^[•\-\–]\s/.test(l));
+            const isQuote = lines.length === 1 && (lines[0].startsWith('«') || lines[0].startsWith('"'));
+            if (isQuote) {
+                let escaped = lines[0].replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+                html += `<div class="text-quote">${escaped}</div>`;
+                continue;
+            }
             
+            const isOrderedList = lines.length >= 2 && lines.every(l => /^\d+[\.\)]\s/.test(l));
+            if (isOrderedList) {
+                html += '<ol>';
+                for (const line of lines) {
+                    let escaped = line.replace(/^\d+[\.\)]\s*/, '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+                    html += `<li>${escaped}</li>`;
+                }
+                html += '</ol>';
+                continue;
+            }
+            
+            const isUnorderedList = lines.length >= 2 && lines.every(l => /^[•\-\–]\s/.test(l));
             if (isUnorderedList) {
                 html += '<ul>';
                 for (const line of lines) {
-                    let escaped = line.replace(/^[•\-\–]\s*/, '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-                    escaped = escaped.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+                    let escaped = line.replace(/^[•\-\–]\s*/, '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
                     html += `<li>${escaped}</li>`;
                 }
                 html += '</ul>';
+                continue;
+            }
+            
+            const singleLine = lines.join(' ');
+            let escaped = singleLine.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+            if (/^[А-ЯЁ][А-ЯЁ\s\-]+$/.test(escaped) && escaped.length < 60 && !escaped.includes('.')) {
+                html += `<p style="font-weight:700;color:var(--accent-blue);margin-top:18px;text-transform:uppercase;letter-spacing:1px;font-size:11px;">${escaped}</p>`;
             } else {
-                // Если это не список — склеиваем все строки в один связный абзац
-                const singleLine = lines.join(' ');
-                let escaped = singleLine.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-                escaped = escaped.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
                 html += `<p>${escaped}</p>`;
             }
         }
-        
         return `<div class="text-block">${html}</div>`;
     }
-
-    // ==================== РЕНДЕРИНГ МЕТРИК ====================
 
     function renderMetrics(metrics) {
         if (!metrics || !metrics.length) {
@@ -693,17 +617,7 @@
             else if (m.value >= 50) { color = '#d97706'; glow = 'rgba(217,119,6,0.45)'; }
             else if (m.value <= 20) { color = '#059669'; glow = 'rgba(5,150,105,0.4)'; }
             else { color = '#2563eb'; glow = 'rgba(37,99,235,0.4)'; }
-
-            html += `
-                <div class="metric-row">
-                    <div class="metric-top">
-                        <span class="metric-name">${m.label}</span>
-                        <span class="metric-pct" style="color:${color};">${m.value}%</span>
-                    </div>
-                    <div class="metric-bar">
-                        <div class="metric-fill animated" id="m-${i}" style="background:${color};box-shadow:0 0 14px ${glow};"></div>
-                    </div>
-                </div>`;
+            html += `<div class="metric-row"><div class="metric-top"><span class="metric-name">${m.label}</span><span class="metric-pct" style="color:${color};">${m.value}%</span></div><div class="metric-bar"><div class="metric-fill animated" id="m-${i}" style="background:${color};box-shadow:0 0 14px ${glow};"></div></div></div>`;
             metricQueue.push({ id: `m-${i}`, width: m.value });
         });
         document.getElementById('block-metrics').innerHTML = html;
