@@ -1,0 +1,541 @@
+{
+  "Дьяченко Наталья": {
+    "status": "Данные надёжны",
+    "medianTime": "8.8 сек",
+    "blurCount": 0,
+    "flatlining": false,
+    "dominantScales": [
+      "Циклотимный (88%)",
+      "Тревожный (75%)",
+      "Эмотивный (75%)"
+    ],
+    "discProfile": "D:60%, I:66%, S:89%, C:83%"
+  },
+  "Александр Стариченко": {
+    "status": "Данные надёжны",
+    "medianTime": "10.3 сек",
+    "blurCount": 0,
+    "flatlining": false,
+    "dominantScales": [
+      "Гипертимный (100%)",
+      "Демонстративный (75%)",
+      "Эмотивный (63%)"
+    ],
+    "discProfile": "D:89%, I:94%, S:83%, C:74%"
+  },
+  "Андреев Владимир": {
+    "status": "Сомнительно (flatlining)",
+    "medianTime": "8.7 сек",
+    "blurCount": 0,
+    "flatlining": true,
+    "dominantScales": [
+      "Гипертимный (88%)",
+      "Демонстративный (67%)",
+      "Застревающий (67%)"
+    ],
+    "discProfile": "D:89%, I:74%, S:74%, C:86%"
+  },
+  "Андреенко Анжелика -": {
+    "status": "Данные надёжны",
+    "medianTime": "10.0 сек",
+    "blurCount": 0,
+    "flatlining": false,
+    "dominantScales": [
+      "Гипертимный (88%)",
+      "Эмотивный (75%)",
+      "Демонстративный (58%)"
+    ],
+    "discProfile": "D:77%, I:74%, S:83%, C:77%"
+  },
+  "Андронова Мария": {
+    "status": "Данные надёжны",
+    "medianTime": "5.5 сек",
+    "blurCount": 0,
+    "flatlining": false,
+    "dominantScales": [
+      "Демонстративный (58%)",
+      "Застревающий (50%)",
+      "Педантичный (50%)"
+    ],
+    "discProfile": "D:83%, I:69%, S:80%, C:94%"
+  },
+  "Асканаков Виктор": {
+    "status": "Данные надёжны",
+    "medianTime": "11.3 сек",
+    "blurCount": 2,
+    "flatlining": false,
+    "dominantScales": [
+      "Демонстративный (67%)",
+      "Гипертимный (63%)",
+      "Застревающий (50%)"
+    ],
+    "discProfile": "D:63%, I:66%, S:60%, C:80%"
+  },
+  "Бахтеева Юлия": {
+    "status": "Сомнительно (flatlining)",
+    "medianTime": "5.9 сек",
+    "blurCount": 0,
+    "flatlining": true,
+    "dominantScales": [
+      "Демонстративный (83%)",
+      "Застревающий (75%)",
+      "Гипертимный (75%)"
+    ],
+    "discProfile": "D:66%, I:60%, S:74%, C:83%"
+  },
+  "Бирин Руслан": {
+    "status": "Сомнительно (низкая открытость)",
+    "medianTime": "7.7 сек",
+    "blurCount": 3,
+    "flatlining": false,
+    "dominantScales": [
+      "Экзальтированный (75%)",
+      "Гипертимный (63%)",
+      "Эмотивный (63%)"
+    ],
+    "discProfile": "D:69%, I:57%, S:83%, C:80%"
+  },
+  "Брилицкий Роман": {
+    "status": "Данные надёжны",
+    "medianTime": "12.2 сек",
+    "blurCount": 1,
+    "flatlining": false,
+    "dominantScales": [
+      "Эмотивный (75%)",
+      "Демонстративный (67%)",
+      "Застревающий (67%)"
+    ],
+    "discProfile": "D:23%, I:51%, S:83%, C:74%"
+  },
+  "Бурова Татьяна": {
+    "status": "Данные надёжны",
+    "medianTime": "6.5 сек",
+    "blurCount": 0,
+    "flatlining": false,
+    "dominantScales": [
+      "Дистимический (88%)",
+      "Застревающий (83%)",
+      "Возбудимый (63%)"
+    ],
+    "discProfile": "D:51%, I:31%, S:77%, C:89%"
+  },
+  "Веприцкий Антон": {
+    "status": "Сомнительно (flatlining)",
+    "medianTime": "11.0 сек",
+    "blurCount": 0,
+    "flatlining": true,
+    "dominantScales": [
+      "Гипертимный (63%)",
+      "Демонстративный (58%)",
+      "Застревающий (50%)"
+    ],
+    "discProfile": "D:69%, I:80%, S:94%, C:83%"
+  },
+  "Гостев Сергей т170": {
+    "status": "Данные надёжны",
+    "medianTime": "7.0 сек",
+    "blurCount": 0,
+    "flatlining": false,
+    "dominantScales": [
+      "Застревающий (75%)",
+      "Гипертимный (75%)",
+      "Демонстративный (58%)"
+    ],
+    "discProfile": "D:100%, I:100%, S:86%, C:100%"
+  },
+  "Григорьев Евгений169": {
+    "status": "Данные надёжны",
+    "medianTime": "3.9 сек",
+    "blurCount": 1,
+    "flatlining": false,
+    "dominantScales": [
+      "Тревожный (75%)",
+      "Демонстративный (58%)",
+      "Застревающий (58%)"
+    ],
+    "discProfile": "D:43%, I:43%, S:57%, C:74%"
+  },
+  "Душевина Ольга": {
+    "status": "Сомнительно (flatlining)",
+    "medianTime": "8.7 сек",
+    "blurCount": 0,
+    "flatlining": true,
+    "dominantScales": [
+      "Гипертимный (88%)",
+      "Демонстративный (67%)",
+      "Застревающий (67%)"
+    ],
+    "discProfile": "D:89%, I:74%, S:74%, C:86%"
+  },
+  "Жалыбина Ирина": {
+    "status": "Сомнительно (flatlining)",
+    "medianTime": "7.8 сек",
+    "blurCount": 4,
+    "flatlining": true,
+    "dominantScales": [
+      "Демонстративный (75%)",
+      "Гипертимный (75%)",
+      "Эмотивный (75%)"
+    ],
+    "discProfile": "D:83%, I:51%, S:91%, C:69%"
+  },
+  "Котлярова Татьяна": {
+    "status": "Данные надёжны",
+    "medianTime": "5.2 сек",
+    "blurCount": 0,
+    "flatlining": false,
+    "dominantScales": [
+      "Экзальтированный (100%)",
+      "Эмотивный (63%)",
+      "Демонстративный (58%)"
+    ],
+    "discProfile": "D:43%, I:40%, S:83%, C:66%"
+  },
+  "Кузнецова Светлана": {
+    "status": "Данные надёжны",
+    "medianTime": "4.9 сек",
+    "blurCount": 0,
+    "flatlining": false,
+    "dominantScales": [
+      "Гипертимный (88%)",
+      "Эмотивный (88%)",
+      "Демонстративный (75%)"
+    ],
+    "discProfile": "D:86%, I:83%, S:83%, C:77%"
+  },
+  "Марова Ирина": {
+    "status": "Данные надёжны",
+    "medianTime": "10.1 сек",
+    "blurCount": 0,
+    "flatlining": false,
+    "dominantScales": [
+      "Гипертимный (88%)",
+      "Застревающий (75%)",
+      "Циклотимный (75%)"
+    ],
+    "discProfile": "D:80%, I:69%, S:83%, C:71%"
+  },
+  "Марченко Виталий": {
+    "status": "Сомнительно (низкая открытость)",
+    "medianTime": "8.3 сек",
+    "blurCount": 0,
+    "flatlining": false,
+    "dominantScales": [
+      "Гипертимный (100%)",
+      "Педантичный (75%)",
+      "Экзальтированный (75%)"
+    ],
+    "discProfile": "D:89%, I:66%, S:83%, C:83%"
+  },
+  "Матц Евгений": {
+    "status": "Данные надёжны",
+    "medianTime": "9.9 сек",
+    "blurCount": 1,
+    "flatlining": false,
+    "dominantScales": [
+      "Циклотимный (63%)",
+      "Экзальтированный (50%)"
+    ],
+    "discProfile": "D:49%, I:49%, S:80%, C:63%"
+  },
+  "Мейкшан Татьяна": {
+    "status": "Данные надёжны",
+    "medianTime": "7.3 сек",
+    "blurCount": 1,
+    "flatlining": false,
+    "dominantScales": [
+      "Гипертимный (63%)",
+      "Застревающий (58%)",
+      "Демонстративный (50%)"
+    ],
+    "discProfile": "D:77%, I:66%, S:83%, C:74%"
+  },
+  "Периков Фёдор": {
+    "status": "Данные надёжны",
+    "medianTime": "4.9 сек",
+    "blurCount": 1,
+    "flatlining": false,
+    "dominantScales": [
+      "Дистимический (75%)",
+      "Экзальтированный (75%)",
+      "Эмотивный (75%)"
+    ],
+    "discProfile": "D:71%, I:37%, S:60%, C:77%"
+  },
+  "Першин Илья": {
+    "status": "Сомнительно (flatlining)",
+    "medianTime": "6.1 сек",
+    "blurCount": 0,
+    "flatlining": true,
+    "dominantScales": [
+      "Гипертимный (88%)",
+      "Эмотивный (75%)",
+      "Демонстративный (58%)"
+    ],
+    "discProfile": "D:80%, I:77%, S:74%, C:83%"
+  },
+  "Плинта Ольга": {
+    "status": "Данные надёжны",
+    "medianTime": "8.6 сек",
+    "blurCount": 0,
+    "flatlining": false,
+    "dominantScales": [
+      "Гипертимный (100%)",
+      "Демонстративный (83%)",
+      "Эмотивный (75%)"
+    ],
+    "discProfile": "D:80%, I:77%, S:89%, C:94%"
+  },
+  "Поливода Ольга": {
+    "status": "Данные надёжны",
+    "medianTime": "4.7 сек",
+    "blurCount": 0,
+    "flatlining": false,
+    "dominantScales": [
+      "Эмотивный (75%)",
+      "Демонстративный (67%)",
+      "Педантичный (67%)"
+    ],
+    "discProfile": "D:60%, I:63%, S:74%, C:94%"
+  },
+  "Прибе Эдуард": {
+    "status": "Данные надёжны",
+    "medianTime": "17.8 сек",
+    "blurCount": 0,
+    "flatlining": false,
+    "dominantScales": [
+      "Гипертимный (75%)",
+      "Эмотивный (75%)",
+      "Педантичный (67%)"
+    ],
+    "discProfile": "D:57%, I:69%, S:69%, C:80%"
+  },
+  "Русских Александр": {
+    "status": "Сомнительно (flatlining)",
+    "medianTime": "4.7 сек",
+    "blurCount": 0,
+    "flatlining": true,
+    "dominantScales": [
+      "Гипертимный (88%)",
+      "Демонстративный (50%)",
+      "Застревающий (50%)"
+    ],
+    "discProfile": "D:74%, I:66%, S:74%, C:49%"
+  },
+  "Саморокова Анна": {
+    "status": "Данные надёжны",
+    "medianTime": "4.8 сек",
+    "blurCount": 0,
+    "flatlining": false,
+    "dominantScales": [
+      "Застревающий (83%)",
+      "Возбудимый (63%)",
+      "Гипертимный (63%)"
+    ],
+    "discProfile": "D:80%, I:74%, S:51%, C:54%"
+  },
+  "Самохина Марина": {
+    "status": "Данные надёжны",
+    "medianTime": "9.4 сек",
+    "blurCount": 3,
+    "flatlining": false,
+    "dominantScales": [
+      "Гипертимный (75%)",
+      "Экзальтированный (75%)",
+      "Застревающий (67%)"
+    ],
+    "discProfile": "D:66%, I:77%, S:91%, C:80%"
+  },
+  "Сергей Стариченко": {
+    "status": "Сомнительно (flatlining)",
+    "medianTime": "9.0 сек",
+    "blurCount": 0,
+    "flatlining": true,
+    "dominantScales": [
+      "Гипертимный (88%)",
+      "Эмотивный (75%)",
+      "Демонстративный (58%)"
+    ],
+    "discProfile": "D:63%, I:60%, S:74%, C:74%"
+  },
+  "Серебренникова Ольга": {
+    "status": "Сомнительно (flatlining)",
+    "medianTime": "7.6 сек",
+    "blurCount": 0,
+    "flatlining": true,
+    "dominantScales": [
+      "Гипертимный (75%)",
+      "Застревающий (67%)",
+      "Эмотивный (63%)"
+    ],
+    "discProfile": "D:66%, I:57%, S:77%, C:77%"
+  },
+  "Слободянюк Федор": {
+    "status": "Формальный комплаенс (flatlining, 36 перекл.)",
+    "medianTime": "9.0 сек",
+    "blurCount": 36,
+    "flatlining": true,
+    "dominantScales": [
+      "Гипертимный (75%)",
+      "Демонстративный (58%)",
+      "Экзальтированный (50%)"
+    ],
+    "discProfile": "D:60%, I:63%, S:71%, C:69%"
+  },
+  "Смердов Борис": {
+    "status": "Данные надёжны",
+    "medianTime": "6.3 сек",
+    "blurCount": 0,
+    "flatlining": false,
+    "dominantScales": [
+      "Гипертимный (88%)",
+      "Эмотивный (63%)",
+      "Демонстративный (58%)"
+    ],
+    "discProfile": "D:83%, I:86%, S:80%, C:80%"
+  },
+  "Фуфаев Андрей": {
+    "status": "Данные надёжны",
+    "medianTime": "11.4 сек",
+    "blurCount": 0,
+    "flatlining": false,
+    "dominantScales": [
+      "Эмотивный (88%)",
+      "Гипертимный (75%)",
+      "Экзальтированный (75%)"
+    ],
+    "discProfile": "D:83%, I:86%, S:86%, C:77%"
+  },
+  "Иванова Галина": {
+    "status": "Данные надёжны",
+    "medianTime": "5.2 сек",
+    "blurCount": 1,
+    "flatlining": false,
+    "dominantScales": [
+      "Тревожный (88%)",
+      "Эмотивный (75%)",
+      "Циклотимный (63%)"
+    ],
+    "discProfile": "D:51%, I:49%, S:80%, C:77%"
+  },
+  "Зинков Алексей": {
+    "status": "Сомнительно (flatlining)",
+    "medianTime": "14.6 сек",
+    "blurCount": 0,
+    "flatlining": true,
+    "dominantScales": [
+      "Гипертимный (75%)",
+      "Эмотивный (75%)",
+      "Застревающий (58%)"
+    ],
+    "discProfile": "D:66%, I:66%, S:77%, C:74%"
+  },
+  "Никитин Александр": {
+    "status": "Данные надёжны",
+    "medianTime": "9.2 сек",
+    "blurCount": 0,
+    "flatlining": false,
+    "dominantScales": [
+      "Гипертимный (63%)",
+      "Эмотивный (63%)",
+      "Застревающий (58%)"
+    ],
+    "discProfile": "D:69%, I:69%, S:71%, C:71%"
+  },
+  "Фомин Александр": {
+    "status": "Данные надёжны",
+    "medianTime": "8.7 сек",
+    "blurCount": 0,
+    "flatlining": false,
+    "dominantScales": [
+      "Эмотивный (88%)",
+      "Демонстративный (75%)",
+      "Гипертимный (75%)"
+    ],
+    "discProfile": "D:60%, I:80%, S:86%, C:60%"
+  },
+  "Морозова Оксана": {
+    "status": "Данные надёжны",
+    "medianTime": "4.7 сек",
+    "blurCount": 0,
+    "flatlining": false,
+    "dominantScales": [
+      "Гипертимный (88%)",
+      "Эмотивный (88%)",
+      "Застревающий (75%)"
+    ],
+    "discProfile": "D:77%, I:77%, S:83%, C:83%"
+  },
+  "Киселев Евгений": {
+    "status": "Сомнительно (flatlining)",
+    "medianTime": "11.5 сек",
+    "blurCount": 4,
+    "flatlining": true,
+    "dominantScales": [
+      "Гипертимный (75%)",
+      "Демонстративный (67%)",
+      "Застревающий (58%)"
+    ],
+    "discProfile": "D:89%, I:86%, S:86%, C:86%"
+  },
+  "Голубцов Виталий": {
+    "status": "Сомнительно (flatlining)",
+    "medianTime": "6.5 сек",
+    "blurCount": 1,
+    "flatlining": true,
+    "dominantScales": [
+      "Гипертимный (75%)",
+      "Демонстративный (50%)",
+      "Застревающий (50%)"
+    ],
+    "discProfile": "D:100%, I:86%, S:71%, C:100%"
+  },
+  "Игнатов Александр": {
+    "status": "Данные надёжны",
+    "medianTime": "4.5 сек",
+    "blurCount": 0,
+    "flatlining": false,
+    "dominantScales": [
+      "Гипертимный (88%)",
+      "Эмотивный (63%)",
+      "Застревающий (58%)"
+    ],
+    "discProfile": "D:86%, I:83%, S:89%, C:80%"
+  },
+  "Коновалов Семен": {
+    "status": "Сомнительно (низкая открытость)",
+    "medianTime": "6.8 сек",
+    "blurCount": 0,
+    "flatlining": false,
+    "dominantScales": [
+      "Застревающий (67%)",
+      "Эмотивный (63%)",
+      "Демонстративный (58%)"
+    ],
+    "discProfile": "D:57%, I:54%, S:94%, C:94%"
+  },
+  "Райчук Юлия": {
+    "status": "Данные надёжны",
+    "medianTime": "4.8 сек",
+    "blurCount": 0,
+    "flatlining": false,
+    "dominantScales": [
+      "Застревающий (83%)",
+      "Демонстративный (67%)",
+      "Педантичный (67%)"
+    ],
+    "discProfile": "D:74%, I:60%, S:54%, C:54%"
+  },
+  "Чурсин Юрий": {
+    "status": "Данные надёжны",
+    "medianTime": "8.9 сек",
+    "blurCount": 0,
+    "flatlining": false,
+    "dominantScales": [
+      "Застревающий (75%)",
+      "Гипертимный (75%)",
+      "Тревожный (75%)"
+    ],
+    "discProfile": "D:57%, I:57%, S:77%, C:83%"
+  }
+}
