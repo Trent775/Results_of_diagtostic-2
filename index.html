@@ -463,7 +463,7 @@
             document.getElementById('error-msg').textContent = 'База данных недоступна.';
             document.getElementById('error-msg').classList.add('visible');
         }
-        const saved = sessionStorage.getItem('am_token_v2');
+        const saved = sessionStorage.getItem('am_token_v3');
         if (saved && DB) { document.getElementById('token-input').value = saved; unlock(); }
     });
 
@@ -496,12 +496,12 @@
             if (!raw || !raw.includes('ПРОФИЛЬ:')) throw new Error();
         } catch (_) { showErr('Ключ недействителен.'); return; }
 
-        sessionStorage.setItem('am_token_v2', token);
+        sessionStorage.setItem('am_token_v3', token);
         render(raw);
     }
 
     function lock() {
-        sessionStorage.removeItem('am_token_v2');
+        sessionStorage.removeItem('am_token_v3');
         document.getElementById('login-screen').style.display = 'block';
         document.getElementById('profile-screen').style.display = 'none';
         document.getElementById('token-input').value = '';
@@ -509,57 +509,121 @@
         metricQueue = [];
     }
 
+    // ==================== ИСПРАВЛЕННЫЙ ПАРСЕР ДОКУМЕНТА ====================
+
     function parseDoc(raw) {
         const clean = raw.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-        const result = { name: '', role: '', tech: [], act1: '', act2: '', act3: '', metrics: [] };
+        const result = { name: '', role: '', tech: [], act1: '', act2: '', act3: '', metrics: [], allText: clean };
 
+        // Собираем весь текст после заголовков в сплошные блоки по секциям
+        const sections = {
+            'portrait': '',
+            'energy': '',
+            'metrics': '',
+            'example': '',
+            'experiment': ''
+        };
+        
+        let currentKey = null;
         const lines = clean.split('\n');
-        let currentSection = '';
-        let sectionLines = [];
-
+        
         for (const line of lines) {
+            // Имя и должность
             if (line.startsWith('ПРОФИЛЬ:')) result.name = line.replace('ПРОФИЛЬ:', '').trim();
             else if (line.startsWith('ДОЛЖНОСТЬ:')) result.role = line.replace('ДОЛЖНОСТЬ:', '').trim();
-            else if (line.startsWith('===')) {
-                if (currentSection && sectionLines.length) {
-                    const content = sectionLines.join('\n').trim();
-                    assignSection(currentSection, content, result);
-                }
-                currentSection = ''; sectionLines = [];
+            
+            // Определяем секцию по заголовкам
+            else if (line.includes('ВАШ ПОРТРЕТ')) currentKey = 'portrait';
+            else if (line.includes('ЧТО ЗАБИРАЕТ ВАШУ ЭНЕРГИЮ') || line.includes('ГИПОТЕЗА СИСТЕМЫ')) currentKey = 'energy';
+            else if (line.includes('КАРТА НАПРЯЖЕНИЯ')) currentKey = 'metrics';
+            else if (line.includes('КАК ЭТО МОЖЕТ ВЫГЛЯДЕТЬ')) currentKey = 'example';
+            else if (line.includes('ЧТО МОЖНО ПОПРОБОВАТЬ') || line.includes('Эксперимент')) currentKey = 'experiment';
+            
+            // Пропускаем разделители
+            else if (line.startsWith('===') || line.startsWith('---')) continue;
+            
+            // Добавляем строку в текущую секцию
+            else if (currentKey) {
+                sections[currentKey] += (sections[currentKey] ? '\n' : '') + line;
             }
-            else if (line.match(/^(ВАШ ПОРТРЕТ|ЧТО ЗАБИРАЕТ|КАРТА НАПРЯЖЕНИЯ|КАК ЭТО МОЖЕТ|ЧТО МОЖНО ПОПРОБОВАТЬ|Эксперимент)/)) {
-                if (currentSection && sectionLines.length) {
-                    const content = sectionLines.join('\n').trim();
-                    assignSection(currentSection, content, result);
-                }
-                currentSection = line.trim(); sectionLines = [];
-            }
-            else { sectionLines.push(line); }
         }
-        if (currentSection && sectionLines.length) {
-            assignSection(currentSection, sectionLines.join('\n').trim(), result);
-        }
+
+        // Собираем акты
+        result.act1 = sections['portrait'].trim();
+        result.act2 = (sections['energy'] + '\n\n' + sections['example']).trim();
+        result.act3 = sections['experiment'].trim();
+        
+        // Парсим метрики из текста карты натяжения
+        result.metrics = parseMetrics(sections['metrics']);
 
         return result;
     }
 
-    function assignSection(heading, content, result) {
-        if (heading.includes('ВАШ ПОРТРЕТ')) result.act1 = content;
-        else if (heading.includes('ЧТО ЗАБИРАЕТ')) result.act2 = content;
-        else if (heading.includes('КАРТА НАПРЯЖЕНИЯ')) result.metrics = parseMetrics(content);
-        else if (heading.includes('КАК ЭТО МОЖЕТ')) result.act2 += '\n\n' + content;
-        else if (heading.includes('ЧТО МОЖНО ПОПРОБОВАТЬ') || heading.includes('Эксперимент')) result.act3 = content;
-    }
+    // ==================== ИСПРАВЛЕННЫЙ ПАРСЕР МЕТРИК ====================
 
     function parseMetrics(text) {
         const metrics = [];
+        if (!text) return metrics;
+        
         const lines = text.split('\n');
+        let currentLabel = '';
+        let currentLines = [];
+        
         for (const line of lines) {
-            const match = line.match(/^(.+?):\s*\n?\s*[█░]+\s*(\d+)%$/);
-            if (match) metrics.push({ label: match[1].trim(), value: parseInt(match[2]) });
+            const trimmed = line.trim();
+            if (!trimmed) continue;
+            
+            // Ищем строку с процентом в конце (например, "100%")
+            const pctMatch = trimmed.match(/^(.+?)\s*:\s*$/) || trimmed.match(/^(.+?)\s+(\d+)%$/);
+            
+            // Если строка заканчивается на двоеточие — это заголовок метрики
+            if (trimmed.endsWith(':') && !trimmed.match(/^\d/)) {
+                if (currentLabel && currentLines.length) {
+                    const value = extractPercent(currentLines.join(' '));
+                    if (value !== null) metrics.push({ label: currentLabel, value });
+                }
+                currentLabel = trimmed.replace(/:$/, '').trim();
+                currentLines = [];
+            }
+            // Если строка содержит процент
+            else if (trimmed.match(/\d+%/)) {
+                currentLines.push(trimmed);
+                if (currentLabel) {
+                    const value = extractPercent(currentLines.join(' '));
+                    if (value !== null) {
+                        metrics.push({ label: currentLabel, value });
+                    }
+                    currentLabel = '';
+                    currentLines = [];
+                }
+            }
+            else {
+                currentLines.push(trimmed);
+            }
         }
+        
+        // Последняя метрика
+        if (currentLabel && currentLines.length) {
+            const value = extractPercent(currentLines.join(' '));
+            if (value !== null) metrics.push({ label: currentLabel, value });
+        }
+
         return metrics;
     }
+
+    function extractPercent(text) {
+        // Ищем паттерны: "80%" или "80 %" или "80-й процентиль"
+        const m1 = text.match(/(\d+)\s*%/);
+        if (m1) return parseInt(m1[1]);
+        
+        // Ищем █████░░░░░ 80%
+        const m2 = text.match(/[█░]+\s*(\d+)\s*%/);
+        if (m2) return parseInt(m2[1]);
+        
+        return null;
+    }
+
+    // ==================== ИСПРАВЛЕННЫЙ РЕНДЕРИНГ ====================
 
     function render(raw) {
         const doc = parseDoc(raw);
@@ -567,12 +631,13 @@
         document.getElementById('h-name').textContent = doc.name || '—';
         document.getElementById('h-role').textContent = doc.role || '—';
 
-        document.getElementById('block-tech').innerHTML = doc.tech.map(t => `<span class="badge">${t}</span>`).join('');
+        // Технические бейджи (пока пусто, можно добавить статус достоверности)
+        document.getElementById('block-tech').innerHTML = '<span class="badge">Данные расшифрованы</span>';
 
         document.getElementById('block-act1').innerHTML = smartFormat(doc.act1);
         document.getElementById('block-act2').innerHTML = smartFormat(doc.act2);
         
-        if (doc.act3) {
+        if (doc.act3 && doc.act3.length > 20) {
             document.getElementById('block-act3').innerHTML = smartFormat(doc.act3);
             document.getElementById('wrap-act3').style.display = 'block';
         } else {
@@ -593,60 +658,58 @@
         setTimeout(animateMetrics, 400);
     }
 
+    // ==================== ИСПРАВЛЕННЫЙ ФОРМАТТЕР ТЕКСТА ====================
+
     function smartFormat(text) {
-        if (!text) return '<div class="text-block"><p style="color:var(--text-tertiary);">Нет данных</p></div>';
+        if (!text || text.length < 10) return '<div class="text-block"><p style="color:var(--text-tertiary);">Нет данных</p></div>';
         
-        const paragraphs = text.split(/\n{2,}/);
+        // Разбиваем на параграфы по двойному переносу строки
+        const rawParagraphs = text.split(/\n{2,}/);
         let html = '';
         
-        for (const para of paragraphs) {
-            const trimmed = para.trim();
+        for (const rawPara of rawParagraphs) {
+            const trimmed = rawPara.trim();
             if (!trimmed) continue;
             
-            let escaped = trimmed.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            // Объединяем все строки внутри одного параграфа в одну линию
+            const singleLine = trimmed.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim();
+            
+            let escaped = singleLine.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
             escaped = escaped.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
             
-            const lines = escaped.split('\n').map(l => l.trim()).filter(l => l);
-            if (lines.length === 0) continue;
-            
-            // Цитата
-            if (lines.length === 1 && (lines[0].startsWith('«') || lines[0].startsWith('"'))) {
-                html += `<div class="text-quote">${lines[0]}</div>`;
+            // Проверяем, является ли это цитатой
+            if (escaped.startsWith('«') || escaped.startsWith('"')) {
+                html += `<div class="text-quote">${escaped}</div>`;
                 continue;
             }
             
-            // Нумерованный список
-            const isOrderedList = lines.length >= 2 && lines.every(l => /^\d+[\.\)]\s/.test(l));
-            if (isOrderedList) {
-                html += '<ol>';
-                for (const line of lines) {
-                    html += `<li>${line.replace(/^\d+[\.\)]\s*/, '')}</li>`;
-                }
-                html += '</ol>';
+            // Проверяем, является ли это заголовком секции (короткая строка заглавными)
+            if (/^[А-ЯЁ][А-ЯЁ\s\-]+$/.test(escaped) && escaped.length < 60) {
+                html += `<p style="font-weight:700;color:var(--accent-blue);margin-top:20px;text-transform:uppercase;letter-spacing:1px;font-size:12px;">${escaped}</p>`;
                 continue;
             }
             
-            // Маркированный список
-            const isUnorderedList = lines.length >= 2 && lines.every(l => /^[•\-\–]\s/.test(l));
-            if (isUnorderedList) {
-                html += '<ul>';
-                for (const line of lines) {
-                    html += `<li>${line.replace(/^[•\-\–]\s*/, '')}</li>`;
-                }
-                html += '</ul>';
+            // Проверяем, является ли это нумерованным списком в одной строке
+            // (после объединения строк номера могут слиться, поэтому проверяем и так)
+            if (/^\d+[\.\)]\s/.test(escaped)) {
+                // Это может быть одиночный пункт или слипшиеся пункты
+                // Просто выводим как параграф
+                html += `<p>${escaped}</p>`;
                 continue;
             }
             
-            // Обычный абзац
-            html += `<p>${lines.join(' ')}</p>`;
+            // Обычный параграф
+            html += `<p>${escaped}</p>`;
         }
         
         return `<div class="text-block">${html}</div>`;
     }
 
+    // ==================== РЕНДЕРИНГ МЕТРИК ====================
+
     function renderMetrics(metrics) {
-        if (!metrics.length) {
-            document.getElementById('block-metrics').innerHTML = '<div class="text-block"><p style="color:var(--text-tertiary);">Метрики отсутствуют</p></div>';
+        if (!metrics || !metrics.length) {
+            document.getElementById('block-metrics').innerHTML = '<div class="text-block"><p style="color:var(--text-tertiary);">Метрики не обнаружены в тексте</p></div>';
             return;
         }
         let html = '';
