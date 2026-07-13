@@ -306,7 +306,6 @@
             font-size: 14px;
             line-height: 1.75;
             color: var(--text-primary);
-            max-width: 680px;
         }
 
         .text-block p {
@@ -329,27 +328,18 @@
             font-weight: 700;
         }
 
-        .text-quote {
-            background: linear-gradient(135deg, rgba(109,40,217,0.03), rgba(29,78,216,0.02));
-            border-left: 3px solid var(--accent-violet);
-            padding: 16px 20px;
-            font-size: 14px;
-            line-height: 1.7;
-            font-style: italic;
-            color: var(--text-primary);
-            border-radius: 0 var(--radius-xs) var(--radius-xs) 0;
-            margin: 16px 0;
-            max-width: 680px;
-        }
-
-        /* ============ METRICS ============ */
+        /* ============ METRICS (Graphs) ============ */
         .metric-row { margin-bottom: 18px; }
         .metric-row:last-child { margin-bottom: 0; }
         .metric-top {
             display: flex; justify-content: space-between; align-items: baseline;
             margin-bottom: 6px;
         }
-        .metric-name { font-size: 12.5px; font-weight: 600; color: var(--text-primary); }
+        .metric-name { 
+            font-size: 13px; 
+            font-weight: 600; 
+            color: var(--text-primary); 
+        }
         .metric-pct {
             font-size: 20px; font-weight: 800; letter-spacing: -0.5px;
             font-family: 'JetBrains Mono', 'SF Mono', monospace;
@@ -518,7 +508,7 @@
         metricQueue = [];
     }
 
-    // ==================== ПАРСЕР ДОКУМЕНТА ====================
+    // ==================== ПАРСЕР ДОКУМЕНТА (Более стабильный) ====================
 
     function parseDoc(raw) {
         const clean = raw.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
@@ -532,6 +522,7 @@
             metrics: [] 
         };
 
+        // Секции для сбора сырых строк
         const sections = {
             'portrait': [],
             'energy': [],
@@ -550,12 +541,14 @@
             if (line.startsWith('ПРОФИЛЬ:')) result.name = line.replace('ПРОФИЛЬ:', '').trim();
             else if (line.startsWith('ДОЛЖНОСТЬ:')) result.role = line.replace('ДОЛЖНОСТЬ:', '').trim();
             
+            // Гибкий поиск заголовков (по ключевым словам)
             else if (trimmed.includes('ВАШ ПОРТРЕТ')) currentKey = 'portrait';
             else if (trimmed.includes('ЭНЕРГИЮ') || trimmed.includes('ГИПОТЕЗА')) currentKey = 'energy';
             else if (trimmed.includes('КАРТА НАПРЯЖЕНИЯ')) currentKey = 'metrics';
             else if (trimmed.includes('ВЫГЛЯДЕТЬ')) currentKey = 'example';
             else if (trimmed.includes('Эксперимент') || trimmed.includes('ПОПРОБОВАТЬ')) currentKey = 'experiment';
-            else if (trimmed.includes('ТЕХНИЧЕСКИЕ ПАРАМЕТРЫ')) currentKey = 'tech';
+            // Технические параметры: ищем слово ПАРАМЕТРЫ в заголовках
+            else if (trimmed.includes('ПАРАМЕТРЫ') && (trimmed.includes('ТЕХНИЧЕСКИЕ') || trimmed.length < 25)) currentKey = 'tech';
             
             else if (trimmed.startsWith('===') || trimmed.startsWith('---')) continue;
             
@@ -564,17 +557,23 @@
             }
         }
 
+        // Склейка текстов
         result.act1 = sections['portrait'].join('\n').trim();
         result.act2 = (sections['energy'].join('\n') + '\n\n' + sections['example'].join('\n')).trim();
         result.act3 = sections['experiment'].join('\n').trim();
-        result.tech = sections['tech'].join('\n').trim();
         
+        // Технические параметры
+        const techRaw = sections['tech'].join('\n').trim();
+        // Разделяем их по запятым и переносам, чтобы получить массив бейджей
+        result.tech = techRaw.split(/\n|,/).map(t => t.trim()).filter(t => t);
+
+        // Парсинг метрик (без удаления текста, просто сбор данных)
         result.metrics = parseMetrics(sections['metrics'].join('\n'));
 
         return result;
     }
 
-    // ==================== ПАРСЕР МЕТРИК ====================
+    // ==================== ПАРСЕР МЕТРИК (Только для правой колонки) ====================
 
     function parseMetrics(text) {
         const metrics = [];
@@ -586,14 +585,16 @@
             const trimmed = line.trim();
             if (!trimmed) continue;
             
-            // Ищем процент в строке и пытаемся взять текст до него как название
-            const match = trimmed.match(/^(.*?)\s*\(?(\d+)\s*%\)?/);
+            // Ищем строки, где есть цифра и знак % в конце
+            const match = trimmed.match(/^(.+?)\s+(\d+)\s*%$/);
             if (match) {
+                // Берем текст до цифры как название, а цифру как значение
                 let label = match[1].replace(/^[•\-\–]\s*/, '').trim();
-                if (label.endsWith(':')) label = label.slice(0, -1).trim();
-                if (!label) label = 'Показатель';
+                // Чистим от лишних двоеточий и тире в конце
+                label = label.replace(/[:\-–\s]+$/, '').trim();
                 
-                metrics.push({ label: label, value: parseInt(match[2]) });
+                const val = parseInt(match[2]);
+                metrics.push({ label: label, value: val });
             }
         }
         return metrics;
@@ -607,14 +608,9 @@
         document.getElementById('h-name').textContent = doc.name || '—';
         document.getElementById('h-role').textContent = doc.role || '—';
 
-        // Технические параметры
-        if (doc.tech) {
-            const techItems = doc.tech.split(/\n|,/).map(t => t.trim()).filter(t => t.length > 0);
-            if (techItems.length) {
-                document.getElementById('block-tech').innerHTML = techItems.map(t => `<span class="badge">${t}</span>`).join('');
-            } else {
-                document.getElementById('block-tech').innerHTML = '<span class="badge">Нет данных</span>';
-            }
+        // Вывод Технических параметров
+        if (doc.tech && doc.tech.length) {
+            document.getElementById('block-tech').innerHTML = doc.tech.map(t => `<span class="badge">${t}</span>`).join('');
         } else {
             document.getElementById('block-tech').innerHTML = '<span class="badge">Нет данных</span>';
         }
@@ -643,43 +639,53 @@
         setTimeout(animateMetrics, 400);
     }
 
-    // ==================== ФОРМАТТЕР ТЕКСТА (Сборка строк) ====================
+    // ==================== ФОРМАТТЕР ТЕКСТА (Исправлен для списков) ====================
 
     function smartFormat(text) {
         if (!text || text.length < 5) return '<div class="text-block"><p style="color:var(--text-tertiary);">Нет данных</p></div>';
         
-        // Разделяем на крупные абзацы по двум переносам
-        const rawParagraphs = text.split(/\n\s*\n/);
-        let html = '';
+        // Разбиваем текст строго построчно, чтобы поймать каждую точку.
+        // Если будет пустая строка, она станет разделителем между параграфами.
+        const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
         
-        for (const rawPara of rawParagraphs) {
-            const lines = rawPara.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-            if (lines.length === 0) continue;
-            
-            // Проверяем, является ли блок списком (все строки начинаются с •)
-            const isUnorderedList = lines.every(l => /^[•\-\–]\s/.test(l));
-            
-            if (isUnorderedList) {
-                html += '<ul>';
-                for (const line of lines) {
-                    let escaped = line.replace(/^[•\-\–]\s*/, '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-                    escaped = escaped.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-                    html += `<li>${escaped}</li>`;
+        let html = '';
+        let currentList = [];
+        let inList = false;
+        
+        for (const line of lines) {
+            // Если строка начинается с буллита • — это элемент списка
+            if (/^[•\-\–]\s/.test(line)) {
+                if (!inList) {
+                    // Если мы начали список, закрываем предыдущий параграф, если он был открыт.
+                    if (html.endsWith('</p>')) html = html.slice(0, -4); // убираем </p>, чтобы начать список
+                    inList = true;
                 }
-                html += '</ul>';
+                let escaped = line.replace(/^[•\-\–]\s*/, '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+                escaped = escaped.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+                currentList.push(`<li>${escaped}</li>`);
             } else {
-                // Если это не список — склеиваем все строки в один связный абзац
-                const singleLine = lines.join(' ');
-                let escaped = singleLine.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+                // Если это не буллит, и до этого был список — закрываем список.
+                if (inList) {
+                    html += `<ul>${currentList.join('')}</ul>`;
+                    currentList = [];
+                    inList = false;
+                }
+                // Обрабатываем обычный текст (склеиваем в один параграф).
+                let escaped = line.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
                 escaped = escaped.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
                 html += `<p>${escaped}</p>`;
             }
         }
         
+        // Если список остался открытым в конце текста — закрываем его
+        if (inList) {
+            html += `<ul>${currentList.join('')}</ul>`;
+        }
+        
         return `<div class="text-block">${html}</div>`;
     }
 
-    // ==================== РЕНДЕРИНГ МЕТРИК ====================
+    // ==================== РЕНДЕРИНГ МЕТРИК (Графики) ====================
 
     function renderMetrics(metrics) {
         if (!metrics || !metrics.length) {
