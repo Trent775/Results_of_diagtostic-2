@@ -17,9 +17,12 @@
             --text-muted: #555555;
             
             --color-blue: #2563eb;
+            --accent-blue-glow: rgba(37, 99, 235, 0.2);
             --color-red: #dc2626;
             --color-green: #059669;
+            --accent-emerald-glow: rgba(5, 150, 105, 0.15);
             --color-orange: #d97706;
+            --accent-violet-glow: rgba(124, 58, 237, 0.15);
             
             --shadow-float: 0 12px 40px rgba(0, 0, 0, 0.04);
             --shadow-inset: inset 0 2px 4px rgba(0,0,0,0.02);
@@ -51,6 +54,38 @@
             position: relative;
         }
 
+        .login-orb {
+            position: absolute; 
+            border-radius: 50%; 
+            pointer-events: none; 
+            z-index: 0;
+            filter: blur(40px);
+            animation: orbFloat 10s ease-in-out infinite alternate;
+        }
+
+        .login-orb.orb-1 {
+            width: 220px; height: 220px; top: -60px; left: -80px;
+            background: var(--accent-blue-glow);
+        }
+
+        .login-orb.orb-2 {
+            width: 280px; height: 280px; bottom: -100px; right: -100px;
+            background: var(--accent-violet-glow);
+            animation-delay: -3s;
+        }
+
+        .login-orb.orb-3 {
+            width: 150px; height: 150px; top: 40%; left: 60%;
+            background: var(--accent-emerald-glow);
+            animation-delay: -6s;
+            animation-duration: 12s;
+        }
+
+        @keyframes orbFloat {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(30px, -40px) scale(1.1); }
+        }
+
         .glass-panel {
             background: var(--bg-card);
             backdrop-filter: blur(20px);
@@ -59,6 +94,8 @@
             border-radius: 24px;
             padding: 40px;
             box-shadow: var(--shadow-float);
+            position: relative;
+            z-index: 1;
         }
 
         .auth-logo {
@@ -124,6 +161,13 @@
         .hero-section::before {
             content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px;
             background: linear-gradient(90deg, var(--color-blue), var(--color-green), var(--color-orange), var(--color-red));
+            background-size: 200% 100%;
+            animation: gradientFlow 5s linear infinite;
+        }
+
+        @keyframes gradientFlow { 
+            0% { background-position: 0% 50%; } 
+            100% { background-position: 200% 50%; } 
         }
 
         .profile-name { font-size: 32px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; }
@@ -213,6 +257,7 @@
     <div id="auth-view">
         <div class="login-orb orb-1"></div>
         <div class="login-orb orb-2"></div>
+        <div class="login-orb orb-3"></div>
         <div class="glass-panel">
             <div class="auth-logo">AM</div>
             <h1 class="auth-title">Analytic Matrix</h1>
@@ -269,7 +314,6 @@
 <script>
 /**
  * СИСТЕМНОЕ ЯДРО
- * Разделено на DataLayer, ParserLayer и UILayer для enterprise-качества.
  */
 
 class DataLayer {
@@ -297,8 +341,6 @@ class DataLayer {
     }
 
     _normalizeString(str) {
-        // Очистка от пробелов, дефисов, цифр. Перевод в нижний регистр.
-        // "Гостев Сергей т170" -> "гостевсергей"
         return str.toLowerCase().replace(/[^а-яёa-z]/gi, '');
     }
 
@@ -312,10 +354,8 @@ class DataLayer {
         if (!this.database) return null;
         const normTarget = this._normalizeString(tokenName);
         
-        // Сначала точное совпадение
         if (this.database[tokenName]) return this.database[tokenName];
         
-        // Нечеткое совпадение
         for (const key in this.database) {
             if (this._normalizeString(key) === normTarget) return this.database[key];
         }
@@ -349,24 +389,17 @@ class DataLayer {
 }
 
 class ParserLayer {
-    
-    // Экранирование HTML тегов
     static escapeHtml(unsafe) {
-        return safeString = unsafe
+        return unsafe
             .replace(/&/g, "&amp;")
             .replace(/</g, "&lt;")
             .replace(/>/g, "&gt;");
     }
 
-    // Парсинг базового Markdown (bold)
     static parseMarkdown(text) {
         return text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
     }
 
-    /**
-     * СИСТЕМНЫЙ УМНЫЙ ФОРМАТЕР ТЕКСТА
-     * Решает проблему "разорванных" строк и слипшихся списков.
-     */
     static formatRichText(rawText) {
         if (!rawText || rawText.trim().length === 0) return '<p>Нет данных</p>';
 
@@ -381,14 +414,11 @@ class ParserLayer {
                 continue;
             }
 
-            // Проверяем, является ли строка концом абзаца/мысли
-            // Заканчивается на пунктуацию ИЛИ следующая строка пустая ИЛИ следующая строка начинается со списка
             const endsWithPunctuation = /[.!?:]$/.test(line);
             const isNextLineEmpty = (i + 1 >= lines.length) || (lines[i + 1].trim() === '');
             const isNextLineList = (i + 1 < lines.length) && /^[-•\d]/.test(lines[i + 1].trim());
 
             if (!endsWithPunctuation && !isNextLineEmpty && !isNextLineList) {
-                // Если строка разорвана, присоединяем следующую
                 lines[i+1] = line + ' ' + lines[i+1].trim();
             } else {
                 processedLines.push(line);
@@ -402,7 +432,6 @@ class ParserLayer {
 
         for (let line of processedLines) {
             if (!line) {
-                // Пустая строка закрывает списки
                 if (inUl) { html += '</ul>'; inUl = false; }
                 if (inOl) { html += '</ol>'; inOl = false; }
                 continue;
@@ -436,10 +465,6 @@ class ParserLayer {
         return html;
     }
 
-    /**
-     * ЖЕСТКИЙ ЭКСТРАКТОР МЕТРИК
-     * Защита от мусора и комментариев LLM.
-     */
     static extractMetrics(text) {
         const metrics = [];
         const lines = text.split('\n');
@@ -449,39 +474,31 @@ class ParserLayer {
             let line = lines[i].trim();
             if (!line) continue;
 
-            // Если парсер дошел до блока "Как читать эту карту" - немедленный стоп.
             if (line.toUpperCase().includes('КАК ЧИТАТЬ') || line.includes('Первая полоска')) {
                 break;
             }
 
-            // Ищем строку с прогресс-баром LLM
             if (/[█░]/.test(line) && line.includes('%')) {
                 const percentMatch = line.match(/(\d{1,3})\s*%/);
                 if (percentMatch && currentLabel) {
                     const value = parseInt(percentMatch[1], 10);
-                    // Валидация: 0-100%, метка адекватной длины, не является служебной строкой
                     if (value >= 0 && value <= 100 && currentLabel.length < 100 && !/колонк|строк/i.test(currentLabel)) {
                         metrics.push({ label: currentLabel, value: value });
                     }
-                    currentLabel = ''; // сброс
+                    currentLabel = ''; 
                 }
             } else {
-                // Если строка не заголовок ===, запоминаем ее как потенциальное имя следующей метрики
                 if (!line.startsWith('===')) {
-                    currentLabel = line.replace(/[:\-]+$/, '').trim(); // Убираем висящие двоеточия
+                    currentLabel = line.replace(/[:\-]+$/, '').trim(); 
                 }
             }
 
-            // Защита: нам нужно максимум 4 показателя карты натяжения
             if (metrics.length === 4) break;
         }
 
         return metrics;
     }
 
-    /**
-     * СЕГМЕНТАТОР ОТЧЕТА
-     */
     static parseDocument(rawText) {
         const doc = { name: '', role: '', portrait: [], tension: [], metricsRaw: '', experiment: [] };
         const lines = rawText.replace(/\r/g, '').split('\n');
@@ -492,20 +509,17 @@ class ParserLayer {
             const trimmed = line.trim();
             const upper = trimmed.toUpperCase();
 
-            // Извлекаем шапку
             if (upper.startsWith('ПРОФИЛЬ:')) { doc.name = trimmed.substring(8).trim(); continue; }
             if (upper.startsWith('ДОЛЖНОСТЬ:')) { doc.role = trimmed.substring(10).trim(); continue; }
             
-            if (/^={5,}$/.test(trimmed)) continue; // Пропускаем ===
+            if (/^={5,}$/.test(trimmed)) continue; 
 
-            // Определяем смену секций по ключевым фразам в заголовках
             if (upper.includes('ВАШ ПОРТРЕТ')) { currentSection = 'portrait'; continue; }
             if (upper.includes('ЧТО ЗАБИРАЕТ ВАШУ ЭНЕРГИЮ') || upper.includes('ГИПОТЕЗА')) { currentSection = 'tension'; continue; }
             if (upper.includes('КАРТА НАПРЯЖЕНИЯ')) { currentSection = 'metricsRaw'; continue; }
-            if (upper.includes('КАК ЭТО МОЖЕТ ВЫГЛЯДЕТЬ')) { currentSection = 'tension'; continue; } // Сливаем гипотезу и пример
+            if (upper.includes('КАК ЭТО МОЖЕТ ВЫГЛЯДЕТЬ')) { currentSection = 'tension'; continue; }
             if (upper.includes('ЧТО МОЖНО ПОПРОБОВАТЬ') || upper.includes('ЭКСПЕРИМЕНТ')) { currentSection = 'experiment'; continue; }
 
-            // Наполняем секции
             if (currentSection === 'metricsRaw') {
                 doc.metricsRaw += line + '\n';
             } else if (currentSection && doc[currentSection] !== undefined) {
@@ -547,7 +561,6 @@ class UILayer {
         this.views.auth.style.display = 'none';
         this.views.profile.style.display = 'block';
         
-        // Запуск анимаций карточек
         const cards = document.querySelectorAll('.content-card');
         cards.forEach((card, index) => {
             setTimeout(() => card.classList.add('visible'), 100 + (index * 150));
@@ -563,11 +576,9 @@ class UILayer {
     }
 
     render(parsedDoc, techInfo) {
-        // Шапка
         document.getElementById('ui-name').textContent = parsedDoc.name || 'Сотрудник';
         document.getElementById('ui-role').textContent = parsedDoc.role || 'Должность не указана';
 
-        // Текстовые блоки
         document.getElementById('ui-portrait').innerHTML = parsedDoc.htmlPortrait;
         document.getElementById('ui-tension').innerHTML = parsedDoc.htmlTension;
         
@@ -579,10 +590,7 @@ class UILayer {
             expEl.style.display = 'none';
         }
 
-        // Метрики
         this.renderMetrics(parsedDoc.metrics);
-
-        // Техническая информация
         this.renderTech(techInfo);
     }
 
@@ -598,10 +606,10 @@ class UILayer {
 
         metrics.forEach((m, i) => {
             let color, shadow;
-            if (m.value >= 80) { color = 'var(--color-red)'; shadow = 'var(--accent-red-glow)'; }
-            else if (m.value >= 50) { color = 'var(--color-orange)'; shadow = 'var(--accent-amber-glow)'; }
-            else if (m.value >= 20) { color = 'var(--color-blue)'; shadow = 'var(--accent-blue-glow)'; }
-            else { color = 'var(--color-green)'; shadow = 'var(--accent-emerald-glow)'; }
+            if (m.value >= 80) { color = 'var(--color-red)'; shadow = 'rgba(220, 38, 38, 0.25)'; }
+            else if (m.value >= 50) { color = 'var(--color-orange)'; shadow = 'rgba(217, 119, 6, 0.25)'; }
+            else if (m.value >= 20) { color = 'var(--color-blue)'; shadow = 'rgba(37, 99, 235, 0.25)'; }
+            else { color = 'var(--color-green)'; shadow = 'rgba(5, 150, 105, 0.25)'; }
 
             html += `
                 <div class="metric-item">
@@ -618,7 +626,6 @@ class UILayer {
 
         container.innerHTML = html;
 
-        // Запускаем анимацию прогресс-баров с задержкой
         setTimeout(() => {
             this.animations.forEach(anim => {
                 const el = document.getElementById(anim.id);
@@ -648,14 +655,12 @@ class UILayer {
     }
 }
 
-// Инициализация приложения
 const data = new DataLayer();
 const ui = new UILayer();
 
 window.addEventListener('DOMContentLoaded', async () => {
     await data.init();
     
-    // Авто-логин
     const savedToken = sessionStorage.getItem('am_token');
     if (savedToken) {
         document.getElementById('token-input').value = savedToken;
